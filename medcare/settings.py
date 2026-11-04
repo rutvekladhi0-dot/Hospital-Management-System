@@ -12,14 +12,19 @@ SECRET_KEY = os.getenv(
 # Production-safe default; enable DEBUG explicitly only for local development.
 DEBUG = os.getenv('DJANGO_DEBUG', 'False').strip().lower() == 'true'
 
+# Always allow Vercel deployment/preview domains, even when a custom
+# DJANGO_ALLOWED_HOSTS environment variable is configured in Vercel.
 ALLOWED_HOSTS = [
     host.strip()
     for host in os.getenv(
         'DJANGO_ALLOWED_HOSTS',
-        '.vercel.app,localhost,127.0.0.1'
+        'localhost,127.0.0.1'
     ).split(',')
     if host.strip()
 ]
+for host in ('.vercel.app', 'localhost', '127.0.0.1'):
+    if host not in ALLOWED_HOSTS:
+        ALLOWED_HOSTS.append(host)
 
 CSRF_TRUSTED_ORIGINS = [
     origin.strip()
@@ -29,6 +34,9 @@ CSRF_TRUSTED_ORIGINS = [
     ).split(',')
     if origin.strip()
 ]
+for origin in ('https://*.vercel.app', 'http://localhost', 'http://127.0.0.1'):
+    if origin not in CSRF_TRUSTED_ORIGINS:
+        CSRF_TRUSTED_ORIGINS.append(origin)
 
 # Vercel terminates HTTPS before forwarding requests to Django.
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
