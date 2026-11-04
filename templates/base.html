@@ -63,10 +63,32 @@
     <script src="{% static 'js/main.js' %}"></script>
     <script>
         $(document).ready(function() {
-            $('.datatable').DataTable({
-                "pageLength": 25,
-                "order": [[ 0, "desc" ]],
-                "responsive": true
+            if ($.fn.dataTable) {
+                $.fn.dataTable.ext.errMode = 'none';
+            }
+
+            $('.datatable').each(function() {
+                var $table = $(this);
+                var $tbody = $table.find('tbody');
+                var $colspanCell = $tbody.find('tr:only-child td[colspan]');
+
+                var emptyMessage = 'No records found';
+                if ($colspanCell.length) {
+                    emptyMessage = $colspanCell.text().trim() || emptyMessage;
+                    $tbody.empty();
+                }
+
+                if (!$.fn.DataTable.isDataTable(this)) {
+                    $table.DataTable({
+                        "pageLength": 25,
+                        "order": [],
+                        "responsive": true,
+                        "language": {
+                            "emptyTable": emptyMessage,
+                            "zeroRecords": emptyMessage
+                        }
+                    });
+                }
             });
         });
     </script>

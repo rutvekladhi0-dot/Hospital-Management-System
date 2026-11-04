@@ -52,13 +52,26 @@
     <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
     <script>
         $(document).ready(function() {
+            if ($.fn.dataTable) {
+                $.fn.dataTable.ext.errMode = 'none';
+            }
             {% block DataTables %}
             {% if table_id %}
-            $('#{{ table_id }}').DataTable({
+            var $t = $('#{{ table_id }}');
+            var $tbody = $t.find('tbody');
+            var $colspanCell = $tbody.find('tr:only-child td[colspan]');
+            var emptyMsg = 'No data available';
+            if ($colspanCell.length) {
+                emptyMsg = $colspanCell.text().trim() || emptyMsg;
+                $tbody.empty();
+            }
+            $t.DataTable({
                 "pageLength": 25,
                 "order": [],
+                "responsive": true,
                 "language": {
-                    "emptyTable": "No data available"
+                    "emptyTable": emptyMsg,
+                    "zeroRecords": emptyMsg
                 }
             });
             {% endif %}

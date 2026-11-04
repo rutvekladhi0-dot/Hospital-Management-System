@@ -21,6 +21,9 @@
                         <th>Start Time</th>
                         <th>End Time</th>
                         <th>Active</th>
+                        {% if formset.can_delete %}
+                        <th>Delete</th>
+                        {% endif %}
                     </tr>
                 </thead>
                 <tbody>
@@ -30,8 +33,8 @@
                         <td>{{ form.start_time }}</td>
                         <td>{{ form.end_time }}</td>
                         <td>{{ form.is_active }}</td>
-                        {% if form.instance.pk %}
-                        <td>{{ form.DELETE }}</td>
+                        {% if formset.can_delete %}
+                        <td>{% if form.instance.pk %}{{ form.DELETE }}{% endif %}</td>
                         {% endif %}
                     </tr>
                     {% endfor %}

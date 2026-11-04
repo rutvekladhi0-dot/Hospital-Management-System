@@ -601,6 +601,7 @@ function hidePageLoading() {
    DATATABLE DEFAULTS
    ======================================== */
 if ($.fn.DataTable) {
+    $.fn.dataTable.ext.errMode = 'none';
     $.extend($.fn.dataTable.defaults, {
         language: {
             search: '<i class="bi bi-search"></i>',
