@@ -19,19 +19,22 @@ def login_view(request):
     if request.method == 'POST':
         form = UserLoginForm(request, data=request.POST)
         if form.is_valid():
-            username = form.cleaned_data.get('username')
-            password = form.cleaned_data.get('password')
-            user = authenticate(username=username, password=password)
-            if user is not None:
-                login(request, user)
-                messages.success(request, f'Welcome back, {user.get_full_name()}!')
-                return redirect('dashboard')
+            user = form.get_user()
+            login(request, user)
+            if not request.POST.get('remember_me'):
+                request.session.set_expiry(0)
             else:
-                messages.error(request, 'Invalid username or password.')
+                request.session.set_expiry(1209600)
+            messages.success(request, f'Welcome back, {user.get_full_name()}!')
+            next_url = request.POST.get('next') or request.GET.get('next')
+            from django.utils.http import url_has_allowed_host_and_scheme
+            if next_url and url_has_allowed_host_and_scheme(next_url, allowed_hosts={request.get_host()}):
+                return redirect(next_url)
+            return redirect('dashboard')
         else:
             messages.error(request, 'Invalid username or password.')
     else:
-        form = UserLoginForm()
+        form = UserLoginForm(request)
 
     return render(request, 'accounts/login.html', {'form': form})
 
@@ -57,8 +60,8 @@ def register_view(request):
             )
             user.roles.add(patient_role)
             from patients.models import Patient
-            Patient.objects.create(user=user)
-            login(request, user)
+            Patient.objects.get_or_create(user=user)
+            login(request, user, backend='accounts.backends.EmailOrUsernameModelBackend')
             messages.success(request, 'Registration successful! Welcome to Medcare Hospital.')
             return redirect('dashboard')
         else:

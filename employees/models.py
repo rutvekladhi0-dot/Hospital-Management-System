@@ -23,9 +23,12 @@ class Employee(models.Model):
     def save(self, *args, **kwargs):
         if not self.employee_id:
             last = Employee.objects.all().order_by('-id').first()
-            if last:
-                last_num = int(last.employee_id.split('-')[1])
-                self.employee_id = f'EMP-{str(last_num + 1).zfill(5)}'
+            if last and last.employee_id and '-' in str(last.employee_id):
+                try:
+                    last_num = int(last.employee_id.split('-')[1])
+                    self.employee_id = f'EMP-{str(last_num + 1).zfill(5)}'
+                except (IndexError, ValueError):
+                    self.employee_id = f'EMP-{str(last.id + 1).zfill(5)}'
             else:
                 self.employee_id = 'EMP-00001'
         super().save(*args, **kwargs)

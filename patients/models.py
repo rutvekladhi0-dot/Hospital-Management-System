@@ -38,9 +38,12 @@ class Patient(models.Model):
     def save(self, *args, **kwargs):
         if not self.patient_id:
             last = Patient.objects.all().order_by('-id').first()
-            if last:
-                last_num = int(last.patient_id.split('-')[1])
-                self.patient_id = f'PAT-{str(last_num + 1).zfill(5)}'
+            if last and last.patient_id and '-' in str(last.patient_id):
+                try:
+                    last_num = int(last.patient_id.split('-')[1])
+                    self.patient_id = f'PAT-{str(last_num + 1).zfill(5)}'
+                except (IndexError, ValueError):
+                    self.patient_id = f'PAT-{str(last.id + 1).zfill(5)}'
             else:
                 self.patient_id = 'PAT-00001'
         super().save(*args, **kwargs)

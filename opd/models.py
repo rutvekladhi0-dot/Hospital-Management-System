@@ -34,9 +34,12 @@ class OPDVisit(models.Model):
     def save(self, *args, **kwargs):
         if not self.opd_number:
             last = OPDVisit.objects.all().order_by('-id').first()
-            if last:
-                last_num = int(last.opd_number.split('-')[1])
-                self.opd_number = f'OPD-{str(last_num + 1).zfill(6)}'
+            if last and last.opd_number and '-' in str(last.opd_number):
+                try:
+                    last_num = int(last.opd_number.split('-')[1])
+                    self.opd_number = f'OPD-{str(last_num + 1).zfill(6)}'
+                except (IndexError, ValueError):
+                    self.opd_number = f'OPD-{str(last.id + 1).zfill(6)}'
             else:
                 self.opd_number = 'OPD-000001'
         super().save(*args, **kwargs)

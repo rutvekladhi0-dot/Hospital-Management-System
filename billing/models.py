@@ -36,9 +36,12 @@ class Invoice(models.Model):
     def save(self, *args, **kwargs):
         if not self.invoice_number:
             last = Invoice.objects.all().order_by('-id').first()
-            if last:
-                last_num = int(last.invoice_number.split('-')[1])
-                self.invoice_number = f'INV-{str(last_num + 1).zfill(6)}'
+            if last and last.invoice_number and '-' in str(last.invoice_number):
+                try:
+                    last_num = int(last.invoice_number.split('-')[1])
+                    self.invoice_number = f'INV-{str(last_num + 1).zfill(6)}'
+                except (IndexError, ValueError):
+                    self.invoice_number = f'INV-{str(last.id + 1).zfill(6)}'
             else:
                 self.invoice_number = 'INV-000001'
         self.net_amount = self.total_amount - self.discount + self.tax
@@ -130,9 +133,12 @@ class PaymentReceipt(models.Model):
     def save(self, *args, **kwargs):
         if not self.receipt_number:
             last = PaymentReceipt.objects.all().order_by('-id').first()
-            if last:
-                last_num = int(last.receipt_number.split('-')[1])
-                self.receipt_number = f'REC-{str(last_num + 1).zfill(6)}'
+            if last and last.receipt_number and '-' in str(last.receipt_number):
+                try:
+                    last_num = int(last.receipt_number.split('-')[1])
+                    self.receipt_number = f'REC-{str(last_num + 1).zfill(6)}'
+                except (IndexError, ValueError):
+                    self.receipt_number = f'REC-{str(last.id + 1).zfill(6)}'
             else:
                 self.receipt_number = 'REC-000001'
         super().save(*args, **kwargs)

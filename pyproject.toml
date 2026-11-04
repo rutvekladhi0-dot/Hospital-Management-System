@@ -4,5 +4,4 @@ version = "0.1.0"
 requires-python = ">=3.12"
 
 [tool.vercel.scripts]
-# Create/update the PostgreSQL schema on every deployment.
-build = "python manage.py migrate --noinput"
+build = "python build.py"

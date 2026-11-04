@@ -12,36 +12,65 @@ SECRET_KEY = os.getenv(
 # Production-safe default; enable DEBUG explicitly only for local development.
 DEBUG = os.getenv('DJANGO_DEBUG', 'False').strip().lower() == 'true'
 
+
+def _clean_host(val: str) -> str:
+    if not val:
+        return ''
+    h = val.strip().strip("'\"")
+    h = h.replace('https://', '').replace('http://', '').split('/')[0]
+    if h.startswith('*.'):
+        h = '.' + h[2:]
+    return h
+
+
 # Always allow Vercel deployment/preview domains, even when a custom
 # DJANGO_ALLOWED_HOSTS environment variable is configured in Vercel.
-ALLOWED_HOSTS = [
-    host.strip()
-    for host in os.getenv(
-        'DJANGO_ALLOWED_HOSTS',
-        'localhost,127.0.0.1'
-    ).split(',')
-    if host.strip()
-]
-for host in ('.vercel.app', 'localhost', '127.0.0.1'):
-    if host not in ALLOWED_HOSTS:
-        ALLOWED_HOSTS.append(host)
+allowed_hosts_env = os.getenv('DJANGO_ALLOWED_HOSTS', '')
+if allowed_hosts_env:
+    ALLOWED_HOSTS = [_clean_host(h) for h in allowed_hosts_env.split(',') if _clean_host(h)]
+else:
+    ALLOWED_HOSTS = ['localhost', '127.0.0.1', '.vercel.app']
 
-CSRF_TRUSTED_ORIGINS = [
-    origin.strip()
-    for origin in os.getenv(
-        'CSRF_TRUSTED_ORIGINS',
-        'https://*.vercel.app,http://localhost,http://127.0.0.1'
-    ).split(',')
-    if origin.strip()
-]
-for origin in ('https://*.vercel.app', 'http://localhost', 'http://127.0.0.1'):
-    if origin not in CSRF_TRUSTED_ORIGINS:
-        CSRF_TRUSTED_ORIGINS.append(origin)
+for default_host in ('.vercel.app', 'localhost', '127.0.0.1', 'testserver'):
+    if default_host not in ALLOWED_HOSTS:
+        ALLOWED_HOSTS.append(default_host)
 
-# Vercel terminates HTTPS before forwarding requests to Django.
+for env_var in ('VERCEL_URL', 'VERCEL_PROJECT_PRODUCTION_URL', 'VERCEL_BRANCH_URL'):
+    env_host = _clean_host(os.getenv(env_var, ''))
+    if env_host and env_host not in ALLOWED_HOSTS:
+        ALLOWED_HOSTS.append(env_host)
+
+csrf_env = os.getenv('CSRF_TRUSTED_ORIGINS', '')
+if csrf_env:
+    CSRF_TRUSTED_ORIGINS = [
+        origin.strip().strip("'\"")
+        for origin in csrf_env.split(',')
+        if origin.strip()
+    ]
+else:
+    CSRF_TRUSTED_ORIGINS = [
+        'https://*.vercel.app',
+        'http://localhost',
+        'http://127.0.0.1',
+    ]
+
+for default_origin in ('https://*.vercel.app', 'http://localhost', 'http://127.0.0.1'):
+    if default_origin not in CSRF_TRUSTED_ORIGINS:
+        CSRF_TRUSTED_ORIGINS.append(default_origin)
+
+for env_var in ('VERCEL_URL', 'VERCEL_PROJECT_PRODUCTION_URL', 'VERCEL_BRANCH_URL'):
+    env_host = _clean_host(os.getenv(env_var, ''))
+    if env_host:
+        https_origin = f'https://{env_host}'
+        if https_origin not in CSRF_TRUSTED_ORIGINS:
+            CSRF_TRUSTED_ORIGINS.append(https_origin)
+
+# Vercel reverse proxy and cookie security settings
+USE_X_FORWARDED_HOST = True
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 SESSION_COOKIE_SECURE = not DEBUG
 CSRF_COOKIE_SECURE = not DEBUG
+SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_SAMESITE = 'Lax'
 CSRF_COOKIE_SAMESITE = 'Lax'
 
@@ -111,11 +140,17 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'medcare.wsgi.application'
 
-if os.getenv('DATABASE_URL'):
+AUTHENTICATION_BACKENDS = [
+    'accounts.backends.EmailOrUsernameModelBackend',
+]
+
+DATABASE_URL = os.getenv('DATABASE_URL')
+if DATABASE_URL:
     DATABASES = {
         'default': dj_database_url.parse(
-            os.environ['DATABASE_URL'],
+            DATABASE_URL,
             conn_max_age=600,
+            conn_health_checks=True,
             ssl_require=True,
         )
     }
@@ -156,6 +191,54 @@ CRISPY_ALLOWED_TEMPLATE_PACKS = 'bootstrap5'
 CRISPY_TEMPLATE_PACK = 'bootstrap5'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '[%(asctime)s] %(levelname)s [%(name)s:%(lineno)s] %(message)s',
+            'datefmt': '%Y-%m-%d %H:%M:%S',
+        },
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'INFO',
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'django.request': {
+            'handlers': ['console'],
+            'level': 'ERROR',
+            'propagate': False,
+        },
+        'django.security': {
+            'handlers': ['console'],
+            'level': 'WARNING',
+            'propagate': False,
+        },
+        'core': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'accounts': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+    },
+}
 
 HOSPITAL_NAME = 'MEDCARE HOSPITAL & DIAGNOSTIC CENTER'
 HOSPITAL_TAGLINE = 'Your Health, Our Priority'

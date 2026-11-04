@@ -367,3 +367,37 @@ def _hr_dashboard(request, context):
         context['total_departments'] = 0
 
     return render(request, 'core/dashboard.html', context)
+
+
+def health_check_view(request):
+    import os
+    from django.http import JsonResponse
+    from django.db import connection
+    from django.conf import settings
+
+    data = {
+        'status': 'ok',
+        'debug': settings.DEBUG,
+        'database': {
+            'has_database_url': bool(os.getenv('DATABASE_URL')),
+            'engine': settings.DATABASES['default']['ENGINE'].split('.')[-1],
+        }
+    }
+    try:
+        connection.ensure_connection()
+        data['database']['connected'] = True
+        tables = connection.introspection.table_names()
+        data['database']['table_count'] = len(tables)
+        data['database']['has_accounts_user'] = 'accounts_user' in tables
+        data['database']['has_django_session'] = 'django_session' in tables
+        data['database']['has_auditlogs'] = 'auditlogs_auditlog' in tables
+        from accounts.models import User
+        data['database']['user_count'] = User.objects.count()
+        data['database']['has_superuser'] = User.objects.filter(is_superuser=True).exists()
+    except Exception as e:
+        data['status'] = 'error'
+        data['database']['connected'] = False
+        data['database']['error'] = str(e)
+
+    return JsonResponse(data)
+
