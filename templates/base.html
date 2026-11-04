@@ -70,11 +70,11 @@
             $('.datatable').each(function() {
                 var $table = $(this);
                 var $tbody = $table.find('tbody');
-                var $colspanCell = $tbody.find('tr:only-child td[colspan]');
+                var $colspanCells = $tbody.find('td[colspan]');
 
                 var emptyMessage = 'No records found';
-                if ($colspanCell.length) {
-                    emptyMessage = $colspanCell.text().trim() || emptyMessage;
+                if ($colspanCells.length) {
+                    emptyMessage = $colspanCells.first().text().trim() || emptyMessage;
                     $tbody.empty();
                 }
 

@@ -602,6 +602,44 @@ function hidePageLoading() {
    ======================================== */
 if ($.fn.DataTable) {
     $.fn.dataTable.ext.errMode = 'none';
+
+    // Hook DataTables initialization to automatically clean up colspan empty states
+    var sanitizeEmptyColspan = function($tables, opts) {
+        opts = opts || {};
+        $tables.each(function() {
+            var $tbody = $(this).find('tbody');
+            var $colspanCells = $tbody.find('td[colspan]');
+            if ($colspanCells.length) {
+                var msg = $colspanCells.first().text().trim();
+                $tbody.empty();
+                if (msg) {
+                    opts.language = opts.language || {};
+                    if (!opts.language.emptyTable) {
+                        opts.language.emptyTable = msg;
+                    }
+                    if (!opts.language.zeroRecords) {
+                        opts.language.zeroRecords = msg;
+                    }
+                }
+            }
+        });
+        return opts;
+    };
+
+    var origDataTable = $.fn.DataTable;
+    $.fn.DataTable = function(opts) {
+        opts = sanitizeEmptyColspan(this, opts);
+        return origDataTable.apply(this, [opts]);
+    };
+    $.extend($.fn.DataTable, origDataTable);
+
+    var origJqueryDataTable = $.fn.dataTable;
+    $.fn.dataTable = function(opts) {
+        opts = sanitizeEmptyColspan(this, opts);
+        return origJqueryDataTable.apply(this, [opts]);
+    };
+    $.extend($.fn.dataTable, origJqueryDataTable);
+
     $.extend($.fn.dataTable.defaults, {
         language: {
             search: '<i class="bi bi-search"></i>',

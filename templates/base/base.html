@@ -59,10 +59,10 @@
             {% if table_id %}
             var $t = $('#{{ table_id }}');
             var $tbody = $t.find('tbody');
-            var $colspanCell = $tbody.find('tr:only-child td[colspan]');
+            var $colspanCells = $tbody.find('td[colspan]');
             var emptyMsg = 'No data available';
-            if ($colspanCell.length) {
-                emptyMsg = $colspanCell.text().trim() || emptyMsg;
+            if ($colspanCells.length) {
+                emptyMsg = $colspanCells.first().text().trim() || emptyMsg;
                 $tbody.empty();
             }
             $t.DataTable({
