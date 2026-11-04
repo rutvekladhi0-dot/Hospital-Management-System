@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}Radiology Report - MEDCARE HOSPITAL & DIAGNOSTIC CENTER{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4><i class="bi bi-file-earmark-xray"></i> Radiology Report - {{ report.order.order_number }}</h4>
+    <div>
+        <a href="{% url 'radiology:order_detail' report.order.pk %}" class="btn btn-secondary"><i class="bi bi-arrow-left"></i> Back</a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card shadow-sm mb-4">
+            <div class="card-header"><h6 class="mb-0">Report Details</h6></div>
+            <div class="card-body">
+                <table class="table table-borderless">
+                    <tr><th style="width:30%">Patient</th><td>{{ report.order.patient.full_name }}</td></tr>
+                    <tr><th>Doctor</th><td>Dr. {{ report.order.doctor.get_full_name }}</td></tr>
+                    <tr><th>Date</th><td>{{ report.created_at|date:"d-M-Y H:i" }}</td></tr>
+                    <tr><th>Reported By</th><td>{{ report.created_by.get_full_name|default:"-" }}</td></tr>
+                </table>
+                <hr>
+                <h6>Findings:</h6>
+                <p>{{ report.findings|default:"-"|linebreaksbr }}</p>
+                <h6>Impression:</h6>
+                <p>{{ report.impression|default:"-"|linebreaksbr }}</p>
+                {% if report.notes %}
+                <h6>Notes:</h6>
+                <p>{{ report.notes|linebreaksbr }}</p>
+                {% endif %}
+            </div>
+        </div>
+
+        {% if report.report_file %}
+        <div class="card shadow-sm mb-4">
+            <div class="card-header"><h6 class="mb-0"><i class="bi bi-file-earmark"></i> Report File</h6></div>
+            <div class="card-body">
+                <a href="{{ report.report_file.url }}" class="btn btn-outline-primary" target="_blank"><i class="bi bi-download"></i> Download Report PDF</a>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+    <div class="col-lg-4">
+        <div class="card shadow-sm mb-4">
+            <div class="card-header"><h6 class="mb-0"><i class="bi bi-images"></i> Images</h6></div>
+            <div class="card-body">
+                {% if report.images.all %}
+                {% for img in report.images.all %}
+                <div class="mb-3">
+                    <img src="{{ img.image.url }}" class="img-fluid rounded border" alt="Radiology Image" style="max-height:200px; cursor:pointer;" onclick="window.open('{{ img.image.url }}','_blank')">
+                    <small class="text-muted d-block">{{ img.description|default:"Image " }}</small>
+                </div>
+                {% endfor %}
+                {% else %}
+                <p class="text-muted text-center">No images attached.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

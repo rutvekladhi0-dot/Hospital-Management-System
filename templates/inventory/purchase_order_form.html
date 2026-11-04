@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}Create Purchase Order - MEDCARE HOSPITAL & DIAGNOSTIC CENTER{% endblock %}
+{% block content %}
+<div class="row justify-content-center"><div class="col-lg-10">
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white"><h5 class="mb-0"><i class="bi bi-cart-check"></i> {% if form.instance.pk %}Edit{% else %}Create{% endif %} Purchase Order</h5></div>
+        <div class="card-body">
+            <form method="post" novalidate class="needs-validation">{% csrf_token %}
+                {% if form.non_field_errors %}<div class="alert alert-danger">{% for e in form.non_field_errors %}<p class="mb-0">{{ e }}</p>{% endfor %}</div>{% endif %}
+                <div class="row">
+                    <div class="col-md-6 mb-3"><label class="form-label">Item <span class="text-danger">*</span></label>{{ form.item }}</div>
+                    <div class="col-md-6 mb-3"><label class="form-label">Supplier Name <span class="text-danger">*</span></label>{{ form.supplier_name }}</div>
+                </div>
+                <div class="row">
+                    <div class="col-md-3 mb-3"><label class="form-label">Quantity</label>{{ form.quantity }}</div>
+                    <div class="col-md-3 mb-3"><label class="form-label">Total Cost</label>{{ form.total_cost }}</div>
+                    <div class="col-md-3 mb-3"><label class="form-label">Order Date</label>{{ form.order_date }}</div>
+                    <div class="col-md-3 mb-3"><label class="form-label">Expected Delivery</label>{{ form.expected_delivery }}</div>
+                </div>
+                <div class="mb-3"><label class="form-label">Status</label>{{ form.status }}</div>
+
+                <h6 class="mt-4 mb-3">Order Items</h6>
+                <div class="table-responsive">
+                    <table class="table table-bordered" id="itemsTable">
+                        <thead class="table-light">
+                            <tr><th>Item</th><th>Qty</th><th>Unit Price</th><th>Total</th><th style="width:50px"></th></tr>
+                        </thead>
+                        <tbody id="itemsBody">
+                            <tr>
+                                <td><select name="items-0-item" class="form-select"><option value="">---------</option>{% for i in inventory_items %}<option value="{{ i.pk }}">{{ i.name }}</option>{% endfor %}</select></td>
+                                <td><input type="number" name="items-0-quantity" class="form-control" value="1" min="1" onchange="calcTotal(this)"></td>
+                                <td><input type="number" name="items-0-unit_price" class="form-control" step="0.01" onchange="calcTotal(this)"></td>
+                                <td><input type="number" name="items-0-total" class="form-control" readonly></td>
+                                <td><button type="button" class="btn btn-outline-danger btn-sm" onclick="this.closest('tr').remove()"><i class="bi bi-x"></i></button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <button type="button" class="btn btn-outline-success btn-sm mb-3" onclick="addItem()"><i class="bi bi-plus-lg"></i> Add Item</button>
+
+                <div class="d-flex justify-content-end gap-2"><a href="{% url 'inventory:purchase_order_list' %}" class="btn btn-secondary">Cancel</a><button type="submit" class="btn btn-primary"><i class="bi bi-check-lg"></i> Save PO</button></div>
+            </form>
+        </div>
+    </div>
+</div></div>
+{% endblock %}
+{% block extra_js %}
+<script>
+var itemIdx = 1;
+function addItem() {
+    var html = `<tr>
+        <td><select name="items-${itemIdx}-item" class="form-select"><option value="">---------</option>{% for i in inventory_items %}<option value="{{ i.pk }}">{{ i.name }}</option>{% endfor %}</select></td>
+        <td><input type="number" name="items-${itemIdx}-quantity" class="form-control" value="1" min="1" onchange="calcTotal(this)"></td>
+        <td><input type="number" name="items-${itemIdx}-unit_price" class="form-control" step="0.01" onchange="calcTotal(this)"></td>
+        <td><input type="number" name="items-${itemIdx}-total" class="form-control" readonly></td>
+        <td><button type="button" class="btn btn-outline-danger btn-sm" onclick="this.closest('tr').remove()"><i class="bi bi-x"></i></button></td>
+    </tr>`;
+    document.getElementById('itemsBody').insertAdjacentHTML('beforeend', html);
+    itemIdx++;
+}
+function calcTotal(el) {
+    var row = el.closest('tr');
+    var q = parseFloat(row.querySelector('[name$="-quantity"]').value) || 0;
+    var p = parseFloat(row.querySelector('[name$="-unit_price"]').value) || 0;
+    row.querySelector('[name$="-total"]').value = (q * p).toFixed(2);
+}
+</script>
+{% endblock %}

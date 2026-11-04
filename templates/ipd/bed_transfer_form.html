@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+{% block title %}Transfer Bed - {{ block.super }}{% endblock %}
+{% block content %}
+<div class="row justify-content-center"><div class="col-lg-7">
+    <div class="card shadow-sm">
+        <div class="card-header bg-warning text-dark"><h5 class="mb-0"><i class="bi bi-arrow-left-right"></i> Transfer Bed - {{ admission.patient.full_name }}</h5></div>
+        <div class="card-body">
+            <div class="alert alert-info">
+                <strong>Current:</strong> {{ admission.bed.ward.name }} / {{ admission.bed.bed_number }}
+            </div>
+            <form method="post" novalidate>{% csrf_token %}{% crispy form %}</form>
+        </div>
+    </div>
+</div></div>
+{% endblock %}

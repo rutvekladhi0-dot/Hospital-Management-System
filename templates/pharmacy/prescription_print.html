@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Prescription {{ prescription.prescription_number }} - MEDCARE HOSPITAL</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 13px;
+            color: #1a1a1a;
+            line-height: 1.5;
+            padding: 30px 40px;
+        }
+
+        .header {
+            border-bottom: 3px solid #0d6efd;
+            padding-bottom: 12px;
+            margin-bottom: 20px;
+        }
+        .header h1 {
+            font-size: 22px;
+            color: #0d6efd;
+            letter-spacing: 1px;
+        }
+        .header .subtitle {
+            font-size: 11px;
+            color: #555;
+            margin-top: 2px;
+        }
+        .header .contact {
+            font-size: 11px;
+            color: #666;
+            margin-top: 4px;
+        }
+
+        .rx-title {
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            margin: 18px 0 14px;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+        }
+
+        .info-grid {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 16px;
+            border: 1px solid #ccc;
+            padding: 12px 16px;
+            border-radius: 4px;
+            background: #fafbfc;
+        }
+        .info-block { width: 48%; }
+        .info-block .label {
+            font-weight: bold;
+            font-size: 11px;
+            text-transform: uppercase;
+            color: #555;
+            margin-bottom: 2px;
+        }
+        .info-block .value { font-size: 13px; margin-bottom: 8px; }
+
+        .diagnosis {
+            margin-bottom: 16px;
+            padding: 10px 14px;
+            border-left: 4px solid #0d6efd;
+            background: #f0f6ff;
+        }
+        .diagnosis .label {
+            font-weight: bold;
+            font-size: 11px;
+            text-transform: uppercase;
+            color: #555;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 18px;
+        }
+        table thead th {
+            background: #0d6efd;
+            color: #fff;
+            padding: 8px 10px;
+            text-align: left;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        table tbody td {
+            padding: 7px 10px;
+            border-bottom: 1px solid #ddd;
+            font-size: 12px;
+        }
+        table tbody tr:nth-child(even) { background: #f9f9f9; }
+
+        .notes {
+            margin-bottom: 20px;
+            padding: 10px 14px;
+            border: 1px dashed #ccc;
+            border-radius: 4px;
+        }
+        .notes .label {
+            font-weight: bold;
+            font-size: 11px;
+            text-transform: uppercase;
+            color: #555;
+        }
+
+        .footer {
+            margin-top: 40px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .signature-block {
+            width: 40%;
+            text-align: center;
+        }
+        .signature-line {
+            border-top: 1px solid #333;
+            margin-top: 50px;
+            padding-top: 4px;
+            font-size: 12px;
+        }
+
+        .watermark {
+            position: fixed;
+            top: 40%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-35deg);
+            font-size: 80px;
+            color: rgba(13, 110, 253, 0.05);
+            font-weight: bold;
+            letter-spacing: 10px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        @media print {
+            body { padding: 15px 25px; }
+            .no-print { display: none !important; }
+            .watermark { display: none; }
+        }
+
+        @page {
+            size: A4;
+            margin: 15mm;
+        }
+    </style>
+</head>
+<body>
+
+<div class="watermark">MEDCARE</div>
+
+<div class="header">
+    <h1>MEDCARE HOSPITAL &amp; DIAGNOSTIC CENTER</h1>
+    <div class="subtitle">123 Health Avenue, Medical District, Dhaka 1205</div>
+    <div class="contact">Phone: +880-1234-567890 | Email: info@medcare.com | www.medcare.com</div>
+</div>
+
+<div class="rx-title">Prescription</div>
+
+<div class="info-grid">
+    <div class="info-block">
+        <div class="label">Prescription No.</div>
+        <div class="value">{{ prescription.prescription_number }}</div>
+        <div class="label">Date</div>
+        <div class="value">{{ prescription.created_at|date:"d F, Y" }}</div>
+        <div class="label">Status</div>
+        <div class="value">{{ prescription.dispensed_status }}</div>
+    </div>
+    <div class="info-block">
+        <div class="label">Patient</div>
+        <div class="value">{{ prescription.patient.full_name }}</div>
+        <div class="label">Doctor</div>
+        <div class="value">Dr. {{ prescription.doctor.get_full_name }}</div>
+    </div>
+</div>
+
+<div class="diagnosis">
+    <div class="label">Diagnosis</div>
+    <div class="value">{{ prescription.diagnosis }}</div>
+</div>
+
+<table>
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>Medicine</th>
+            <th>Dosage</th>
+            <th>Frequency</th>
+            <th>Duration</th>
+            <th>Qty</th>
+            <th>Instructions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in prescription.items.all %}
+        <tr>
+            <td>{{ forloop.counter }}</td>
+            <td><strong>{{ item.medicine.name }}</strong></td>
+            <td>{{ item.dosage }}</td>
+            <td>{{ item.get_frequency_display }}</td>
+            <td>{{ item.duration }}</td>
+            <td>{{ item.quantity }}</td>
+            <td>{{ item.instructions|default:"-" }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="7" style="text-align:center;">No items in this prescription.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% if prescription.notes %}
+<div class="notes">
+    <div class="label">Notes</div>
+    <div class="value">{{ prescription.notes }}</div>
+</div>
+{% endif %}
+
+<div class="footer">
+    <div></div>
+    <div class="signature-block">
+        <div class="signature-line">
+            Dr. {{ prescription.doctor.get_full_name }}<br>
+            <small>Prescribing Doctor</small>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

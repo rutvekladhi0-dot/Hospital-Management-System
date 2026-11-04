@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+{% block title %}Lab Orders - MEDCARE HOSPITAL & DIAGNOSTIC CENTER{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4><i class="bi bi-clipboard2-data"></i> Lab Orders</h4>
+    <a href="{% url 'laboratory:order_create' %}" class="btn btn-primary"><i class="bi bi-plus-lg"></i> New Order</a>
+</div>
+<div class="card shadow-sm">
+    <div class="card-body">
+        <div class="row g-3 mb-3">
+            <div class="col-md-2">
+                <select class="form-select" id="statusFilter" onchange="filterTable()">
+                    <option value="">All Status</option>
+                    <option value="pending">Pending</option>
+                    <option value="in-progress">In Progress</option>
+                    <option value="completed">Completed</option>
+                    <option value="cancelled">Cancelled</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <select class="form-select" id="priorityFilter" onchange="filterTable()">
+                    <option value="">All Priority</option>
+                    <option value="routine">Routine</option>
+                    <option value="urgent">Urgent</option>
+                    <option value="stat">STAT</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <input type="text" class="form-control" placeholder="Search orders..." id="searchInput" onkeyup="filterTable()">
+            </div>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover datatable" id="orderTable">
+                <thead class="table-dark">
+                    <tr>
+                        <th>#</th>
+                        <th>Order #</th>
+                        <th>Patient</th>
+                        <th>Doctor</th>
+                        <th>Date</th>
+                        <th>Tests</th>
+                        <th>Priority</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for order in orders %}
+                    <tr data-status="{{ order.status }}" data-priority="{{ order.priority }}">
+                        <td>{{ forloop.counter }}</td>
+                        <td><strong>{{ order.order_number }}</strong></td>
+                        <td>{{ order.patient.full_name|default:order.patient }}</td>
+                        <td>Dr. {{ order.doctor.get_full_name|default:order.doctor }}</td>
+                        <td>{{ order.created_at|date:"d-M-Y" }}</td>
+                        <td><span class="badge bg-info">{{ order.items.count }} test(s)</span></td>
+                        <td>
+                            {% if order.priority == 'stat' %}
+                            <span class="badge bg-danger">STAT</span>
+                            {% elif order.priority == 'urgent' %}
+                            <span class="badge bg-warning text-dark">Urgent</span>
+                            {% else %}
+                            <span class="badge bg-secondary">Routine</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if order.status == 'completed' %}
+                            <span class="badge bg-success">Completed</span>
+                            {% elif order.status == 'in-progress' %}
+                            <span class="badge bg-primary">In Progress</span>
+                            {% elif order.status == 'cancelled' %}
+                            <span class="badge bg-dark">Cancelled</span>
+                            {% else %}
+                            <span class="badge bg-warning text-dark">Pending</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="btn-group btn-group-sm">
+                                <a href="{% url 'laboratory:order_detail' order.pk %}" class="btn btn-outline-info"><i class="bi bi-eye"></i></a>
+                                {% if order.status != 'completed' %}
+                                <a href="{% url 'laboratory:order_update' order.pk %}" class="btn btn-outline-primary"><i class="bi bi-pencil"></i></a>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="9" class="text-center py-4">
+                            <i class="bi bi-clipboard2-data text-muted" style="font-size:2rem;"></i>
+                            <p class="mt-2 text-muted">No lab orders found.</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function filterTable() {
+    var status = document.getElementById('statusFilter').value.toLowerCase();
+    var priority = document.getElementById('priorityFilter').value.toLowerCase();
+    var search = document.getElementById('searchInput').value.toLowerCase();
+    document.querySelectorAll('#orderTable tbody tr').forEach(function(row) {
+        var s = (row.dataset.status || '').toLowerCase();
+        var p = (row.dataset.priority || '').toLowerCase();
+        var text = row.textContent.toLowerCase();
+        row.style.display = ((!status || s === status) && (!priority || p === priority) && (!search || text.includes(search))) ? '' : 'none';
+    });
+}
+</script>
+{% endblock %}

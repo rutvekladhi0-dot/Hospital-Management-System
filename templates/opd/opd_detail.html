@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}OPD Visit {{ opd.opd_number }} - MEDCARE HOSPITAL & DIAGNOSTIC CENTER{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4><i class="bi bi-hospital"></i> OPD Visit {{ opd.opd_number }}</h4>
+    <div>
+        <a href="{% url 'opd:opd_update' opd.pk %}" class="btn btn-primary"><i class="bi bi-pencil"></i> Edit</a>
+        <a href="{% url 'opd:opd_list' %}" class="btn btn-secondary"><i class="bi bi-arrow-left"></i> Back</a>
+    </div>
+</div>
+<div class="row">
+    <div class="col-lg-6">
+        <div class="card shadow-sm mb-4">
+            <div class="card-header"><h6 class="mb-0">Visit Information</h6></div>
+            <div class="card-body">
+                <table class="table table-borderless">
+                    <tr><th style="width:40%">OPD #</th><td>{{ opd.opd_number }}</td></tr>
+                    <tr><th>Patient</th><td><a href="{% url 'patients:patient_detail' opd.patient.pk %}">{{ opd.patient.full_name }}</a></td></tr>
+                    <tr><th>Doctor</th><td>Dr. {{ opd.doctor.get_full_name }}</td></tr>
+                    <tr><th>Department</th><td>{{ opd.department.name|default:"-" }}</td></tr>
+                    <tr><th>Date</th><td>{{ opd.visit_date|date:"d-M-Y" }}</td></tr>
+                    <tr><th>Status</th><td>
+                        {% if opd.status == 'completed' %}<span class="badge bg-success">Completed</span>
+                        {% elif opd.status == 'in-progress' %}<span class="badge bg-primary">In Progress</span>
+                        {% else %}<span class="badge bg-warning text-dark">Waiting</span>{% endif %}
+                    </td></tr>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="card shadow-sm mb-4">
+            <div class="card-header"><h6 class="mb-0">Clinical Details</h6></div>
+            <div class="card-body">
+                <table class="table table-borderless">
+                    <tr><th style="width:40%">Chief Complaint</th><td>{{ opd.chief_complaint|default:"-" }}</td></tr>
+                    <tr><th>Diagnosis</th><td>{{ opd.diagnosis|default:"-" }}</td></tr>
+                    <tr><th>Treatment</th><td>{{ opd.treatment|default:"-" }}</td></tr>
+                    <tr><th>Follow-up</th><td>{{ opd.follow_up_date|date:"d-M-Y"|default:"-" }}</td></tr>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

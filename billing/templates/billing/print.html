@@ -1,0 +1,87 @@
+{% extends "base/base.html" %}
+
+{% block title %}Print Invoice {{ invoice.invoice_number }} - MEDCARE{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="text-center mb-4">
+        <h3>MEDCARE HOSPITAL & DIAGNOSTIC CENTER</h3>
+        <p>Dhaka, Bangladesh | Phone: +880-1700-000000</p>
+    </div>
+
+    <div class="row mb-3">
+        <div class="col-6">
+            <strong>Invoice #:</strong> {{ invoice.invoice_number }}<br>
+            <strong>Date:</strong> {{ invoice.created_at|date:"d M Y" }}<br>
+            <strong>Patient:</strong> {{ invoice.patient }}<br>
+        </div>
+        <div class="col-6 text-end">
+            <strong>Status:</strong> {{ invoice.status }}<br>
+            <strong>Created By:</strong> {{ invoice.created_by }}<br>
+        </div>
+    </div>
+
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Description</th>
+                <th class="text-center">Qty</th>
+                <th class="text-end">Unit Price</th>
+                <th class="text-end">Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in items %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ item.description }}</td>
+                <td class="text-center">{{ item.quantity }}</td>
+                <td class="text-end">{{ item.unit_price|floatformat:2 }}</td>
+                <td class="text-end">{{ item.total_price|floatformat:2 }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="row">
+        <div class="col-6 offset-6">
+            <table class="table table-bordered">
+                <tr><th>Total Amount</th><td class="text-end">{{ invoice.total_amount|floatformat:2 }}</td></tr>
+                <tr><th>Discount</th><td class="text-end">- {{ invoice.discount|floatformat:2 }}</td></tr>
+                <tr><th>Tax</th><td class="text-end">+ {{ invoice.tax|floatformat:2 }}</td></tr>
+                <tr><th><strong>Net Amount</strong></th><td class="text-end"><strong>{{ invoice.net_amount|floatformat:2 }}</strong></td></tr>
+                <tr><th>Paid Amount</th><td class="text-end">{{ invoice.paid_amount|floatformat:2 }}</td></tr>
+                <tr><th><strong>Due Amount</strong></th><td class="text-end"><strong class="text-danger">{{ invoice.due_amount|floatformat:2 }}</strong></td></tr>
+            </table>
+        </div>
+    </div>
+
+    {% if payments %}
+    <h5 class="mt-4">Payment History</h5>
+    <table class="table table-bordered">
+        <thead>
+            <tr><th>Amount</th><th>Method</th><th>Transaction ID</th><th>Date</th></tr>
+        </thead>
+        <tbody>
+            {% for payment in payments %}
+            <tr>
+                <td>{{ payment.amount|floatformat:2 }}</td>
+                <td>{{ payment.payment_method }}</td>
+                <td>{{ payment.transaction_id|default:"N/A" }}</td>
+                <td>{{ payment.created_at|date:"d M Y" }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+
+    <div class="text-center mt-5">
+        <p class="text-muted">Thank you for choosing MEDCARE Hospital!</p>
+    </div>
+
+    <div class="text-center mt-4">
+        <button class="btn btn-primary" onclick="window.print()"><i class="fas fa-print"></i> Print Invoice</button>
+    </div>
+</div>
+{% endblock %}

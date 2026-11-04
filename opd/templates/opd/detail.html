@@ -1,0 +1,62 @@
+{% extends "base/base.html" %}
+
+{% block title %}OPD Visit {{ opd_visit.opd_number }} - MEDCARE{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="d-flex justify-content-between mb-3">
+            <h4><i class="fas fa-stethoscope"></i> OPD Visit {{ opd_visit.opd_number }}</h4>
+            <div>
+                {% if opd_visit.status != 'Completed' %}
+                <a href="{% url 'opd:opd_complete' opd_visit.pk %}" class="btn btn-success"><i class="fas fa-check"></i> Complete Visit</a>
+                <a href="{% url 'opd:opd_update' opd_visit.pk %}" class="btn btn-warning"><i class="fas fa-edit"></i> Edit</a>
+                {% endif %}
+                <a href="{% url 'opd:opd_list' %}" class="btn btn-secondary">Back</a>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card mb-3">
+                    <div class="card-header"><h6>Visit Details</h6></div>
+                    <div class="card-body">
+                        <table class="table table-bordered">
+                            <tr><th>OPD Number</th><td>{{ opd_visit.opd_number }}</td></tr>
+                            <tr><th>Patient</th><td>{{ opd_visit.patient }}</td></tr>
+                            <tr><th>Doctor</th><td>{{ opd_visit.doctor }}</td></tr>
+                            <tr><th>Visit Date</th><td>{{ opd_visit.visit_date|date:"d M Y" }}</td></tr>
+                            <tr><th>Status</th><td>
+                                {% if opd_visit.status == 'Completed' %}
+                                <span class="badge bg-success">{{ opd_visit.status }}</span>
+                                {% elif opd_visit.status == 'In-Progress' %}
+                                <span class="badge bg-info">{{ opd_visit.status }}</span>
+                                {% elif opd_visit.status == 'Waiting' %}
+                                <span class="badge bg-warning">{{ opd_visit.status }}</span>
+                                {% else %}
+                                <span class="badge bg-secondary">{{ opd_visit.status }}</span>
+                                {% endif %}
+                            </td></tr>
+                            <tr><th>Appointment</th><td>{{ opd_visit.appointment|default:"N/A" }}</td></tr>
+                            <tr><th>Follow-up Date</th><td>{{ opd_visit.follow_up_date|date:"d M Y"|default:"N/A" }}</td></tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card mb-3">
+                    <div class="card-header"><h6>Medical Details</h6></div>
+                    <div class="card-body">
+                        <table class="table table-bordered">
+                            <tr><th>Symptoms</th><td>{{ opd_visit.symptoms|linebreaksbr|default:"N/A" }}</td></tr>
+                            <tr><th>Diagnosis</th><td>{{ opd_visit.diagnosis|linebreaksbr|default:"N/A" }}</td></tr>
+                            <tr><th>Treatment</th><td>{{ opd_visit.treatment|linebreaksbr|default:"N/A" }}</td></tr>
+                            <tr><th>Doctor Notes</th><td>{{ opd_visit.doctor_notes|linebreaksbr|default:"N/A" }}</td></tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

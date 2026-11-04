@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+{% block title %}Invoice {{ invoice.invoice_number }} - MEDCARE HOSPITAL & DIAGNOSTIC CENTER{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4><i class="bi bi-receipt"></i> Invoice {{ invoice.invoice_number }}</h4>
+    <div>
+        {% if invoice.due_amount > 0 %}
+        <a href="{% url 'billing:payment_create' invoice.pk %}" class="btn btn-success"><i class="bi bi-cash"></i> Make Payment</a>
+        {% endif %}
+        <a href="{% url 'billing:invoice_print' invoice.pk %}" class="btn btn-outline-secondary" target="_blank"><i class="bi bi-printer"></i> Print</a>
+        <a href="{% url 'billing:invoice_list' %}" class="btn btn-secondary"><i class="bi bi-arrow-left"></i> Back</a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card shadow-sm mb-4">
+            <div class="card-header"><h6 class="mb-0">Invoice Items</h6></div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr><th>#</th><th>Description</th><th>Qty</th><th>Unit Price</th><th>Total</th></tr>
+                        </thead>
+                        <tbody>
+                            {% for item in invoice.items.all %}
+                            <tr>
+                                <td>{{ forloop.counter }}</td>
+                                <td>{{ item.description }}</td>
+                                <td>{{ item.quantity }}</td>
+                                <td>{{ item.unit_price|floatformat:2 }}</td>
+                                <td>{{ item.total_price|floatformat:2 }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr><td colspan="5" class="text-center text-muted">No items.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="text-end mt-3">
+                    <table class="table table-sm w-50 ms-auto">
+                        <tr><th>Subtotal:</th><td>{{ invoice.total_amount|floatformat:2 }}</td></tr>
+                        {% if invoice.discount > 0 %}<tr><th>Discount:</th><td class="text-danger">-{{ invoice.discount|floatformat:2 }}</td></tr>{% endif %}
+                        {% if invoice.tax > 0 %}<tr><th>Tax:</th><td>{{ invoice.tax|floatformat:2 }}</td></tr>{% endif %}
+                        <tr class="table-dark"><th>Total:</th><td><strong>{{ invoice.net_amount|floatformat:2 }}</strong></td></tr>
+                        <tr class="text-success"><th>Paid:</th><td>{{ invoice.paid_amount|floatformat:2 }}</td></tr>
+                        {% if invoice.due_amount > 0 %}
+                        <tr class="text-danger"><th>Due:</th><td class="fw-bold">{{ invoice.due_amount|floatformat:2 }}</td></tr>
+                        {% endif %}
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="card shadow-sm">
+            <div class="card-header"><h6 class="mb-0"><i class="bi bi-cash-stack"></i> Payment History</h6></div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr><th>#</th><th>Receipt</th><th>Amount</th><th>Method</th><th>Date</th><th>Actions</th></tr>
+                        </thead>
+                        <tbody>
+                            {% for payment in invoice.payments.all %}
+                            <tr>
+                                <td>{{ forloop.counter }}</td>
+                                <td><strong>{{ payment.receipt_number }}</strong></td>
+                                <td class="text-success fw-bold">{{ payment.amount|floatformat:2 }}</td>
+                                <td>{{ payment.get_payment_method_display }}</td>
+                                <td>{{ payment.created_at|date:"d-M-Y H:i" }}</td>
+                                <td><a href="{% url 'billing:payment_detail' payment.pk %}" class="btn btn-sm btn-outline-info"><i class="bi bi-eye"></i></a></td>
+                            </tr>
+                            {% empty %}
+                            <tr><td colspan="6" class="text-center text-muted">No payments recorded.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="card shadow-sm mb-4">
+            <div class="card-header"><h6 class="mb-0">Invoice Info</h6></div>
+            <div class="card-body">
+                <table class="table table-borderless table-sm">
+                    <tr><th>Invoice #</th><td>{{ invoice.invoice_number }}</td></tr>
+                    <tr><th>Patient</th><td>{{ invoice.patient.full_name }}</td></tr>
+                    <tr><th>Date</th><td>{{ invoice.created_at|date:"d-M-Y" }}</td></tr>
+                    <tr><th>Created By</th><td>{{ invoice.created_by.get_full_name|default:"-" }}</td></tr>
+                    <tr><th>Status</th><td>
+                        {% if invoice.status == 'Paid' %}<span class="badge bg-success">Paid</span>
+                        {% elif invoice.status == 'Partial' %}<span class="badge bg-warning text-dark">Partial</span>
+                        {% else %}<span class="badge bg-danger">Unpaid</span>{% endif %}
+                    </td></tr>
+                    <tr><th>Notes</th><td>{{ invoice.notes|default:"-" }}</td></tr>
+                </table>
+            </div>
+        </div>
+        <a href="{% url 'billing:add_item' invoice.pk %}" class="btn btn-outline-primary w-100"><i class="bi bi-plus-lg"></i> Add Item</a>
+    </div>
+</div>
+{% endblock %}

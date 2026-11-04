@@ -1,0 +1,56 @@
+{% extends "base/base.html" %}
+{% load crispy_forms_tags %}
+
+{% block title %}Patient Insurance - MEDCARE{% endblock %}
+
+{% block content %}
+<div class="row mb-3">
+    <div class="col-md-8">
+        <h4><i class="fas fa-user-shield"></i> Patient Insurance Records</h4>
+    </div>
+    <div class="col-md-4 text-end">
+        <a href="{% url 'insurance:patient_insurance_create' %}" class="btn btn-primary"><i class="fas fa-plus"></i> Add Insurance</a>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <form method="get" class="row g-2 mb-3">
+            <div class="col-md-10">
+                <input type="text" name="search" class="form-control" placeholder="Search by patient ID, name or policy number..." value="{{ request.GET.search }}">
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary"><i class="fas fa-filter"></i> Filter</button>
+            </div>
+        </form>
+        <table id="{{ table_id }}" class="table table-striped table-hover">
+            <thead>
+                <tr>
+                    <th>Patient</th>
+                    <th>Plan</th>
+                    <th>Policy Number</th>
+                    <th>Start Date</th>
+                    <th>End Date</th>
+                    <th>Active</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for record in patient_insurances %}
+                <tr>
+                    <td>{{ record.patient }}</td>
+                    <td>{{ record.plan }}</td>
+                    <td>{{ record.policy_number }}</td>
+                    <td>{{ record.start_date|date:"d M Y" }}</td>
+                    <td>{{ record.end_date|date:"d M Y" }}</td>
+                    <td>{% if record.is_active %}<span class="badge bg-success">Yes</span>{% else %}<span class="badge bg-danger">No</span>{% endif %}</td>
+                    <td>
+                        <a href="{% url 'insurance:patient_insurance_create' %}" class="btn btn-sm btn-warning"><i class="fas fa-edit"></i></a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

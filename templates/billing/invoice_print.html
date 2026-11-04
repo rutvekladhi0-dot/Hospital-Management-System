@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+{% block title %}Invoice {{ invoice.invoice_number }} - MEDCARE HOSPITAL & DIAGNOSTIC CENTER{% endblock %}
+{% block extra_css %}
+<style>
+    @media print {
+        .no-print { display: none !important; }
+        body { font-size: 11pt; margin: 0; padding: 15px; }
+        .card { border: none !important; box-shadow: none !important; }
+        .container { max-width: 100%; }
+    }
+    .invoice-header { border-bottom: 3px solid #0d6efd; padding-bottom: 15px; margin-bottom: 20px; }
+    .invoice-header h2 { color: #0d6efd; margin: 0; }
+    .invoice-box { border: 1px solid #dee2e6; padding: 20px; border-radius: 8px; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="no-print mb-3">
+    <button onclick="window.print()" class="btn btn-primary"><i class="bi bi-printer"></i> Print Invoice</button>
+    <a href="{% url 'billing:invoice_detail' invoice.pk %}" class="btn btn-secondary"><i class="bi bi-arrow-left"></i> Back</a>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <div class="invoice-header text-center">
+            <h2>MEDCARE HOSPITAL & DIAGNOSTIC CENTER</h2>
+            <p class="text-muted mb-0">Medical Invoice</p>
+        </div>
+
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <h6 class="text-primary">BILL TO:</h6>
+                <p class="mb-0"><strong>{{ invoice.patient.full_name }}</strong></p>
+                <p class="mb-0">{{ invoice.patient.address|default:"" }}</p>
+                <p class="mb-0">Phone: {{ invoice.patient.phone|default:"-" }}</p>
+                {% if invoice.patient.patient_id %}<p>Patient ID: {{ invoice.patient.patient_id }}</p>{% endif %}
+            </div>
+            <div class="col-md-6 text-md-end">
+                <table class="table table-sm table-borderless ms-auto" style="width:auto">
+                    <tr><th>Invoice #:</th><td>{{ invoice.invoice_number }}</td></tr>
+                    <tr><th>Date:</th><td>{{ invoice.created_at|date:"d-M-Y" }}</td></tr>
+                    <tr><th>Status:</th><td>
+                        {% if invoice.status == 'Paid' %}<span class="badge bg-success">PAID</span>
+                        {% elif invoice.status == 'Partial' %}<span class="badge bg-warning">PARTIAL</span>
+                        {% else %}<span class="badge bg-danger">UNPAID</span>{% endif %}
+                    </td></tr>
+                </table>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-bordered">
+                <thead class="table-dark">
+                    <tr><th>#</th><th>Description</th><th class="text-center">Qty</th><th class="text-end">Unit Price</th><th class="text-end">Total</th></tr>
+                </thead>
+                <tbody>
+                    {% for item in invoice.items.all %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ item.description }}</td>
+                        <td class="text-center">{{ item.quantity }}</td>
+                        <td class="text-end">{{ item.unit_price|floatformat:2 }}</td>
+                        <td class="text-end">{{ item.total_price|floatformat:2 }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+                {% if invoice.notes %}
+                <h6>Notes:</h6>
+                <p class="text-muted">{{ invoice.notes }}</p>
+                {% endif %}
+            </div>
+            <div class="col-md-6">
+                <table class="table table-sm table-borderless" style="width:250px; float:right">
+                    <tr><th>Subtotal:</th><td class="text-end">{{ invoice.total_amount|floatformat:2 }}</td></tr>
+                    {% if invoice.discount > 0 %}<tr><th>Discount:</th><td class="text-end text-danger">-{{ invoice.discount|floatformat:2 }}</td></tr>{% endif %}
+                    {% if invoice.tax > 0 %}<tr><th>Tax:</th><td class="text-end">{{ invoice.tax|floatformat:2 }}</td></tr>{% endif %}
+                    <tr class="border-top border-2"><th class="fs-5">TOTAL:</th><td class="text-end fs-5 fw-bold">{{ invoice.net_amount|floatformat:2 }}</td></tr>
+                    <tr class="text-success"><th>Paid:</th><td class="text-end">{{ invoice.paid_amount|floatformat:2 }}</td></tr>
+                    {% if invoice.due_amount > 0 %}
+                    <tr class="text-danger"><th>DUE:</th><td class="text-end fw-bold">{{ invoice.due_amount|floatformat:2 }}</td></tr>
+                    {% endif %}
+                </table>
+            </div>
+        </div>
+
+        <div class="row mt-5">
+            <div class="col-md-6">
+                <p class="mt-5 pt-3 border-top"><strong>Authorized Signature</strong></p>
+            </div>
+            <div class="col-md-6 text-end">
+                <p class="mt-5 pt-3 border-top"><strong>Customer Signature</strong></p>
+            </div>
+        </div>
+
+        <div class="text-center mt-3">
+            <small class="text-muted">Thank you for choosing MEDCARE HOSPITAL & DIAGNOSTIC CENTER</small>
+        </div>
+    </div>
+</div>
+{% endblock %}

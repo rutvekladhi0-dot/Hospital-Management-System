@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Patient Documents | {{ hospital_name }}{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="mb-0"><i class="bi bi-file-earmark me-2"></i>Documents for {{ patient }}</h4>
+    <div>
+        <a href="{% url 'patients:patient_detail' patient.pk %}" class="btn btn-outline-secondary"><i class="bi bi-arrow-left me-1"></i>Back to Patient</a>
+    </div>
+</div>
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h6 class="mb-0">All Documents</h6>
+        <a href="{% url 'patients:patient_document_upload' patient.pk %}" class="btn btn-sm btn-primary"><i class="bi bi-upload me-1"></i>Upload Document</a>
+    </div>
+    <div class="card-body">
+        <table class="table table-hover">
+            <thead>
+                <tr><th>Title</th><th>Type</th><th>Description</th><th>Uploaded By</th><th>Date</th><th>Actions</th></tr>
+            </thead>
+            <tbody>
+                {% for doc in documents %}
+                <tr>
+                    <td>{{ doc.title }}</td>
+                    <td><span class="badge bg-secondary">{{ doc.get_document_type_display }}</span></td>
+                    <td>{{ doc.description|truncatewords:10|default:"-" }}</td>
+                    <td>{{ doc.uploaded_by.get_full_name|default:doc.uploaded_by.username }}</td>
+                    <td>{{ doc.uploaded_at|date:"d M Y" }}</td>
+                    <td>
+                        <a href="{{ doc.file.url }}" class="btn btn-sm btn-outline-primary" target="_blank"><i class="bi bi-download"></i></a>
+                        <a href="{% url 'patients:patient_document_delete' doc.pk %}" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="6" class="text-center text-muted py-4">No documents found</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

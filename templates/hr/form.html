@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+
+{% block title %}HR Form{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4><i class="fas fa-form me-2"></i>{% if form.instance.pk %}Update{% else %}Create{% endif %}</h4>
+    <a href="{% url 'hr:designation_list' %}" class="btn btn-outline-secondary btn-sm"><i class="fas fa-arrow-left me-1"></i>Back</a>
+</div>
+<div class="card">
+    <div class="card-body">
+        {% crispy form %}
+    </div>
+</div>
+{% endblock %}

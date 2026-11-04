@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+{% block title %}Discharge Patient - {{ block.super }}{% endblock %}
+{% block content %}
+<div class="row justify-content-center"><div class="col-lg-8">
+    <div class="card shadow-sm">
+        <div class="card-header bg-success text-white"><h5 class="mb-0"><i class="bi bi-box-arrow-right"></i> Discharge Patient - {{ admission.patient.full_name }}</h5></div>
+        <div class="card-body">
+            <div class="alert alert-info">
+                <strong>Admission #:</strong> {{ admission.admission_number }} | <strong>Ward/Bed:</strong> {{ admission.bed.ward.name }}/{{ admission.bed.bed_number }} | <strong>Admitted:</strong> {{ admission.admission_date|date:"d-M-Y" }}
+            </div>
+            <form method="post" novalidate>{% csrf_token %}{% crispy form %}</form>
+        </div>
+    </div>
+</div></div>
+{% endblock %}

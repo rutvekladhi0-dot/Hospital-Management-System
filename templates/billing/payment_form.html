@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+{% block title %}Make Payment - {{ block.super }}{% endblock %}
+{% block content %}
+<div class="row justify-content-center"><div class="col-lg-6">
+    <div class="card shadow-sm">
+        <div class="card-header bg-success text-white"><h5 class="mb-0"><i class="bi bi-cash"></i> Make Payment - Invoice {{ invoice.invoice_number }}</h5></div>
+        <div class="card-body">
+            <div class="alert alert-info">
+                <div class="row text-center">
+                    <div class="col-4"><strong>Total:</strong><br>{{ invoice.net_amount|floatformat:2 }}</div>
+                    <div class="col-4"><strong>Paid:</strong><br>{{ invoice.paid_amount|floatformat:2 }}</div>
+                    <div class="col-4 text-danger"><strong>Due:</strong><br><strong>{{ invoice.due_amount|floatformat:2 }}</strong></div>
+                </div>
+            </div>
+            <form method="post" novalidate>{% csrf_token %}{% crispy form %}</form>
+        </div>
+    </div>
+</div></div>
+{% endblock %}

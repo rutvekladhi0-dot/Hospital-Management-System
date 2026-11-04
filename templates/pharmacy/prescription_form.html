@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+{% block title %}{% if form.instance.pk %}Edit Prescription{% else %}New Prescription{% endif %} - MEDCARE HOSPITAL & DIAGNOSTIC CENTER{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="bi bi-clipboard2-pulse"></i> {% if form.instance.pk %}Edit Prescription{% else %}Create New Prescription{% endif %}</h5>
+            </div>
+            <div class="card-body">
+                <form method="post" novalidate class="needs-validation">
+                    {% csrf_token %}
+                    {% if form.non_field_errors %}
+                    <div class="alert alert-danger">{% for e in form.non_field_errors %}<p class="mb-0">{{ e }}</p>{% endfor %}</div>
+                    {% endif %}
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Patient <span class="text-danger">*</span></label>
+                            {{ form.patient }}
+                            {% if form.patient.errors %}<div class="text-danger small">{{ form.patient.errors.0 }}</div>{% endif %}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Visit</label>
+                            {{ form.visit }}
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Diagnosis</label>
+                            {{ form.diagnosis }}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Notes</label>
+                            {{ form.notes }}
+                        </div>
+                    </div>
+
+                    <h6 class="mt-4 mb-3"><i class="bi bi-list-ul"></i> Prescription Items</h6>
+                    <div class="table-responsive">
+                        <table class="table table-bordered" id="itemsTable">
+                            <thead class="table-light">
+                                <tr>
+                                    <th style="width:30%">Medicine</th>
+                                    <th>Dosage</th>
+                                    <th>Frequency</th>
+                                    <th>Duration</th>
+                                    <th>Quantity</th>
+                                    <th>Instructions</th>
+                                    <th style="width:50px"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {{ formset.empty_form }}
+                            </tbody>
+                        </table>
+                    </div>
+                    <button type="button" class="btn btn-outline-success btn-sm mb-3" onclick="addItem()">
+                        <i class="bi bi-plus-lg"></i> Add Medicine
+                    </button>
+
+                    {{ formset.management_form }}
+
+                    <div class="d-flex justify-content-end gap-2 mt-4">
+                        <a href="{% url 'pharmacy:prescription_list' %}" class="btn btn-secondary">Cancel</a>
+                        <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg"></i> {% if form.instance.pk %}Update{% else %}Save{% endif %} Prescription</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+var itemCount = {{ formset.total_form_count }};
+function addItem() {
+    var tbody = document.querySelector('#itemsTable tbody');
+    var totalForms = document.getElementById('id_items-TOTAL_FORMS');
+    var newIdx = totalForms.value;
+    var template = tbody.querySelector('tr:last-child');
+    if (template && template.classList.contains('d-none')) template.remove();
+    var emptyForm = document.querySelector('#itemsTable tbody tr') || document.createElement('tr');
+    var html = `<tr>
+        <td><select name="items-${newIdx}-medicine" class="form-select form-select-sm" id="id_items-${newIdx}-medicine">
+            <option value="">---------</option>{% for med in medicines %}<option value="{{ med.pk }}">{{ med.name }}</option>{% endfor %}
+        </select></td>
+        <td><input type="text" name="items-${newIdx}-dosage" class="form-control form-control-sm" id="id_items-${newIdx}-dosage"></td>
+        <td><select name="items-${newIdx}-frequency" class="form-select form-select-sm" id="id_items-${newIdx}-frequency">
+            <option value="OD">OD</option><option value="BD">BD</option><option value="TDS">TDS</option><option value="QID">QID</option><option value="PRN">PRN</option>
+        </select></td>
+        <td><input type="text" name="items-${newIdx}-duration" class="form-control form-control-sm" id="id_items-${newIdx}-duration" placeholder="e.g. 7 days"></td>
+        <td><input type="number" name="items-${newIdx}-quantity" class="form-control form-control-sm" id="id_items-${newIdx}-quantity" min="1" value="1"></td>
+        <td><input type="text" name="items-${newIdx}-instructions" class="form-control form-control-sm" id="id_items-${newIdx}-instructions" placeholder="e.g. After food"></td>
+        <td><button type="button" class="btn btn-outline-danger btn-sm" onclick="removeItem(this)"><i class="bi bi-x"></i></button></td>
+    </tr>`;
+    tbody.insertAdjacentHTML('beforeend', html);
+    totalForms.value = parseInt(newIdx) + 1;
+}
+function removeItem(btn) {
+    btn.closest('tr').remove();
+}
+</script>
+{% endblock %}

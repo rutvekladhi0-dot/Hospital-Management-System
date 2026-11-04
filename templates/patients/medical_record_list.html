@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+{% block title %}Medical Records | {{ hospital_name }}{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="mb-0"><i class="bi bi-file-medical me-2"></i>Medical Records</h4>
+    <a href="{% url 'patients:medical_record_create' %}" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i>Add Record</a>
+</div>
+<div class="card">
+    <div class="card-body">
+        <table class="table table-hover datatable" id="medicalRecordTable">
+            <thead>
+                <tr><th>Patient</th><th>Doctor</th><th>Diagnosis</th><th>Date</th><th>Actions</th></tr>
+            </thead>
+            <tbody>
+                {% for record in medical_records %}
+                <tr>
+                    <td>{{ record.patient.user.get_full_name|default:record.patient.user.username }}</td>
+                    <td>Dr. {{ record.doctor.get_full_name|default:record.doctor.username }}</td>
+                    <td>{{ record.diagnosis|truncatewords:5 }}</td>
+                    <td>{{ record.created_at|date:"d M Y" }}</td>
+                    <td>
+                        <a href="{% url 'patients:medical_record_detail' record.pk %}" class="btn btn-sm btn-outline-info"><i class="bi bi-eye"></i></a>
+                        <a href="{% url 'patients:medical_record_update' record.pk %}" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i></a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="5" class="text-center text-muted py-4">No medical records found</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

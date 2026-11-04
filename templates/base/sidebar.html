@@ -1,0 +1,171 @@
+{% load static %}
+<ul class="nav flex-column">
+    <li class="nav-item">
+        <a class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}" href="{% url 'dashboard' %}">
+            <i class="bi bi-speedometer2"></i>
+            <span>Dashboard</span>
+        </a>
+    </li>
+
+    {% if user.is_superuser %}
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'departments:department_list' %}"><i class="bi bi-building"></i><span>Departments</span></a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'employees:employee_list' %}"><i class="bi bi-people"></i><span>Employees</span></a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'doctors:doctor_list' %}"><i class="bi bi-person-badge"></i><span>Doctors</span></a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'patients:patient_list' %}"><i class="bi bi-person-heart"></i><span>Patients</span></a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'appointments:appointment_list' %}"><i class="bi bi-calendar-check"></i><span>Appointments</span></a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'opd:opd_list' %}"><i class="bi bi-clipboard-pulse"></i><span>OPD</span></a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'ipd:ward_list' %}"><i class="bi bi-clipboard2-pulse"></i><span>IPD / Wards</span></a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'pharmacy:medicine_list' %}"><i class="bi bi-capsule"></i><span>Pharmacy</span></a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'laboratory:order_list' %}"><i class="bi bi-droplet"></i><span>Laboratory</span></a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'radiology:order_list' %}"><i class="bi bi-camera-reels"></i><span>Radiology</span></a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'billing:invoice_list' %}"><i class="bi bi-receipt"></i><span>Billing</span></a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'insurance:provider_list' %}"><i class="bi bi-shield-check"></i><span>Insurance</span></a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'nursing:task_list' %}"><i class="bi bi-heart-pulse"></i><span>Nursing</span></a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'ambulance:request_list' %}"><i class="bi bi-truck"></i><span>Ambulance</span></a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'inventory:item_list' %}"><i class="bi bi-box-seam"></i><span>Inventory</span></a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'hr:training_list' %}"><i class="bi bi-mortarboard"></i><span>HR</span></a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'accounts:user_list' %}"><i class="bi bi-people-fill"></i><span>Users</span></a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'auditlogs:audit_log_list' %}"><i class="bi bi-journal-text"></i><span>Audit Logs</span></a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'reports:report_dashboard' %}"><i class="bi bi-graph-up"></i><span>Reports</span></a>
+    </li>
+
+    {% elif user.is_doctor %}
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'appointments:appointment_list' %}"><i class="bi bi-calendar-check"></i><span>My Appointments</span></a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'patients:patient_list' %}"><i class="bi bi-person-heart"></i><span>My Patients</span></a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'laboratory:order_list' %}"><i class="bi bi-droplet"></i><span>Lab Orders</span></a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'radiology:order_list' %}"><i class="bi bi-camera-reels"></i><span>Radiology</span></a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'pharmacy:prescription_list' %}"><i class="bi bi-capsule"></i><span>Prescriptions</span></a>
+    </li>
+
+    {% elif user.is_patient %}
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'appointments:appointment_list' %}"><i class="bi bi-calendar-check"></i><span>My Appointments</span></a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'pharmacy:prescription_list' %}"><i class="bi bi-capsule"></i><span>Prescriptions</span></a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'laboratory:order_list' %}"><i class="bi bi-droplet"></i><span>Lab Reports</span></a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'billing:invoice_list' %}"><i class="bi bi-receipt"></i><span>My Bills</span></a>
+    </li>
+
+    {% elif user.is_nurse %}
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'nursing:task_list' %}"><i class="bi bi-clipboard-check"></i><span>Tasks</span></a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'nursing:vitals_list' %}"><i class="bi bi-heart-pulse"></i><span>Vital Signs</span></a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'ipd:ward_list' %}"><i class="bi bi-bed"></i><span>Wards</span></a>
+    </li>
+
+    {% elif user.is_pharmacist %}
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'pharmacy:medicine_list' %}"><i class="bi bi-capsule"></i><span>Medicines</span></a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'pharmacy:prescription_list' %}"><i class="bi bi-clipboard"></i><span>Prescriptions</span></a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'pharmacy:stock_alert' %}"><i class="bi bi-exclamation-triangle"></i><span>Stock Alerts</span></a>
+    </li>
+
+    {% elif user.is_lab_technician %}
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'laboratory:order_list' %}"><i class="bi bi-droplet"></i><span>Lab Orders</span></a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'laboratory:test_list' %}"><i class="bi bi-droplet-half"></i><span>Lab Tests</span></a>
+    </li>
+
+    {% elif user.is_accountant %}
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'billing:invoice_list' %}"><i class="bi bi-receipt"></i><span>Invoices</span></a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'billing:payment_list' %}"><i class="bi bi-credit-card"></i><span>Payments</span></a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'billing:due_list' %}"><i class="bi bi-exclamation-circle"></i><span>Due Tracking</span></a>
+    </li>
+
+    {% elif user.is_hr_manager %}
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'employees:employee_list' %}"><i class="bi bi-people"></i><span>Employees</span></a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'employees:leave_list' %}"><i class="bi bi-calendar-x"></i><span>Leave Requests</span></a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'hr:training_list' %}"><i class="bi bi-mortarboard"></i><span>Trainings</span></a>
+    </li>
+
+    {% elif user.is_receptionist %}
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'patients:patient_list' %}"><i class="bi bi-person-heart"></i><span>Patients</span></a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'appointments:appointment_list' %}"><i class="bi bi-calendar-check"></i><span>Appointments</span></a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'billing:invoice_list' %}"><i class="bi bi-receipt"></i><span>Billing</span></a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'insurance:provider_list' %}"><i class="bi bi-shield-check"></i><span>Insurance</span></a>
+    </li>
+
+    {% else %}
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'appointments:appointment_list' %}"><i class="bi bi-calendar-check"></i><span>Appointments</span></a>
+    </li>
+    {% endif %}
+</ul>

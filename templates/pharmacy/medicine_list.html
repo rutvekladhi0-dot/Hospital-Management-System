@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+{% block title %}Medicine List - MEDCARE HOSPITAL & DIAGNOSTIC CENTER{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4><i class="bi bi-capsule"></i> Medicine List</h4>
+    <div>
+        <a href="{% url 'pharmacy:medicine_create' %}" class="btn btn-primary"><i class="bi bi-plus-lg"></i> Add Medicine</a>
+        <button class="btn btn-success" onclick="exportTable('medicineTable','medicine_list')"><i class="bi bi-download"></i> Export</button>
+    </div>
+</div>
+
+<div class="card shadow-sm mb-4">
+    <div class="card-body">
+        <div class="row g-3 mb-3">
+            <div class="col-md-3">
+                <select class="form-select" id="categoryFilter" onchange="filterByCategory()">
+                    <option value="">All Categories</option>
+                    {% for cat in categories %}
+                    <option value="{{ cat.0 }}" {% if selected_category == cat.0 %}selected{% endif %}>{{ cat.1 }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <input type="text" class="form-control" placeholder="Search medicines..." id="searchInput" onkeyup="searchMedicines()">
+            </div>
+            <div class="col-md-3">
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" id="lowStockOnly" onchange="filterByCategory()">
+                    <label class="form-check-label" for="lowStockOnly">Show Low Stock Only</label>
+                </div>
+            </div>
+        </div>
+        {% if low_stock_count %}
+        <div class="alert alert-warning d-flex align-items-center">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            <strong>{{ low_stock_count }} medicine(s) are running low on stock!</strong>
+            <a href="{% url 'pharmacy:stock_alert' %}" class="ms-2">View Alert</a>
+        </div>
+        {% endif %}
+        <div class="table-responsive">
+            <table class="table table-hover datatable" id="medicineTable">
+                <thead class="table-dark">
+                    <tr>
+                        <th>#</th>
+                        <th>Name</th>
+                        <th>Generic Name</th>
+                        <th>Category</th>
+                        <th>Batch No</th>
+                        <th>Price (৳)</th>
+                        <th>Stock</th>
+                        <th>Expiry Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for med in medicines %}
+                    <tr data-category="{{ med.category }}" data-stock="{{ med.stock_quantity }}" data-name="{{ med.name|lower }}">
+                        <td>{{ forloop.counter }}</td>
+                        <td><strong>{{ med.name }}</strong></td>
+                        <td>{{ med.generic_name|default:"-" }}</td>
+                        <td><span class="badge bg-info">{{ med.category|default:"-" }}</span></td>
+                        <td>{{ med.batch_number|default:"-" }}</td>
+                        <td>{{ med.unit_price|floatformat:2 }}</td>
+                        <td>
+                            {% if med.stock_quantity <= med.minimum_stock %}
+                            <span class="badge bg-danger">{{ med.stock_quantity }} (Low)</span>
+                            {% elif med.stock_quantity <= med.minimum_stock|add:"10" %}
+                            <span class="badge bg-warning text-dark">{{ med.stock_quantity }}</span>
+                            {% else %}
+                            <span class="badge bg-success">{{ med.stock_quantity }}</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if med.expiry_date %}
+                                {% if med.expiry_date < today %}
+                                <span class="badge bg-danger">Expired</span>
+                                {% elif med.expiry_date < thirty_days %}
+                                <span class="badge bg-warning text-dark">{{ med.expiry_date|date:"d-M-Y" }}</span>
+                                {% else %}
+                                {{ med.expiry_date|date:"d-M-Y" }}
+                                {% endif %}
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="btn-group btn-group-sm">
+                                <a href="{% url 'pharmacy:medicine_detail' med.pk %}" class="btn btn-outline-info" title="View"><i class="bi bi-eye"></i></a>
+                                <a href="{% url 'pharmacy:medicine_update' med.pk %}" class="btn btn-outline-primary" title="Edit"><i class="bi bi-pencil"></i></a>
+                                <a href="{% url 'pharmacy:medicine_delete' med.pk %}" class="btn btn-outline-danger" title="Delete" onclick="return confirm('Delete this medicine?')"><i class="bi bi-trash"></i></a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="9" class="text-center py-4">
+                            <i class="bi bi-capsule text-muted" style="font-size:2rem;"></i>
+                            <p class="mt-2 text-muted">No medicines found. <a href="{% url 'pharmacy:medicine_create' %}">Add your first medicine</a></p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function filterByCategory() {
+    var category = document.getElementById('categoryFilter').value.toLowerCase();
+    var lowStockOnly = document.getElementById('lowStockOnly').checked;
+    var rows = document.querySelectorAll('#medicineTable tbody tr');
+    rows.forEach(function(row) {
+        if (row.cells.length < 2) return;
+        var rowCat = (row.dataset.category || '').toLowerCase();
+        var stock = parseInt(row.dataset.stock) || 0;
+        var catMatch = !category || rowCat.includes(category);
+        var stockMatch = !lowStockOnly || stock <= 10;
+        row.style.display = (catMatch && stockMatch) ? '' : 'none';
+    });
+}
+function searchMedicines() {
+    var query = document.getElementById('searchInput').value.toLowerCase();
+    var rows = document.querySelectorAll('#medicineTable tbody tr');
+    rows.forEach(function(row) {
+        var text = row.textContent.toLowerCase();
+        row.style.display = text.includes(query) ? '' : 'none';
+    });
+}
+function exportTable(tableId, filename) {
+    var table = document.getElementById(tableId);
+    var rows = [];
+    for (var i = 0; i < table.rows.length; i++) {
+        var row = [], cols = table.rows[i].cells;
+        for (var j = 0; j < cols.length - 1; j++) row.push(cols[j].innerText.replace(/,/g, ''));
+        rows.push(row.join(','));
+    }
+    var blob = new Blob([rows.join('\n')], {type:'text/csv'});
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = filename + '.csv';
+    a.click();
+}
+</script>
+{% endblock %}

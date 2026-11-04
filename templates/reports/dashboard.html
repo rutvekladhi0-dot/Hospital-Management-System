@@ -1,0 +1,161 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+{% load humanize %}
+
+{% block title %}Report Dashboard{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4><i class="fas fa-chart-line"></i> Report Dashboard</h4>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card bg-primary text-white">
+            <div class="card-body text-center">
+                <h2>{{ total_patients|intcomma }}</h2>
+                <p class="mb-0">Total Patients</p>
+                <small>{{ new_patients_month }} new this month</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-success text-white">
+            <div class="card-body text-center">
+                <h2>{{ total_revenue|intcomma }}</h2>
+                <p class="mb-0">Total Revenue</p>
+                <small>Paid: {{ paid_amount|intcomma }}</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-info text-white">
+            <div class="card-body text-center">
+                <h2>{{ total_appointments|intcomma }}</h2>
+                <p class="mb-0">Total Appointments</p>
+                <small>Today: {{ today_appointments }}</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-warning text-dark">
+            <div class="card-body text-center">
+                <h2>{{ total_employees|intcomma }}</h2>
+                <p class="mb-0">Employees</p>
+                <small>Active staff</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-body text-center">
+                <h4 class="text-danger">{{ pending_dues|intcomma }}</h4>
+                <p class="mb-0">Pending Dues</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-body text-center">
+                <h4 class="text-warning">{{ low_stock_count }}</h4>
+                <p class="mb-0">Low Stock Medicines</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-body text-center">
+                <h4 class="text-info">{{ total_lab_orders|intcomma }}</h4>
+                <p class="mb-0">Lab Orders</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-body text-center">
+                <h4 class="text-secondary">{{ pending_lab_orders }}</h4>
+                <p class="mb-0">Pending Lab Orders</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header"><i class="fas fa-file-invoice-dollar"></i> Revenue Report</div>
+            <div class="card-body">
+                <p>Track total revenue, paid amounts, due amounts, and department-wise breakdown.</p>
+                <a href="{% url 'reports:revenue_report' %}" class="btn btn-primary">View Revenue Report</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header"><i class="fas fa-calendar-check"></i> Appointment Report</div>
+            <div class="card-body">
+                <p>Analyze appointment statistics including completed, cancelled, and no-show rates.</p>
+                <a href="{% url 'reports:appointment_report' %}" class="btn btn-primary">View Appointment Report</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-3">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header"><i class="fas fa-user-injured"></i> Patient Report</div>
+            <div class="card-body">
+                <p>View new vs total patients, department-wise patient distribution.</p>
+                <a href="{% url 'reports:patient_report' %}" class="btn btn-primary">View Patient Report</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header"><i class="fas fa-pills"></i> Pharmacy Report</div>
+            <div class="card-body">
+                <p>Medicine sales, stock value, top medicines, and low stock alerts.</p>
+                <a href="{% url 'reports:pharmacy_report' %}" class="btn btn-primary">View Pharmacy Report</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-3">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header"><i class="fas fa-boxes"></i> Inventory Report</div>
+            <div class="card-body">
+                <p>Track purchases, inventory value, and low stock items.</p>
+                <a href="{% url 'reports:inventory_report' %}" class="btn btn-primary">View Inventory Report</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header"><i class="fas fa-flask"></i> Lab Report</div>
+            <div class="card-body">
+                <p>Lab test statistics: completed, pending, and in-progress orders.</p>
+                <a href="{% url 'reports:lab_report' %}" class="btn btn-primary">View Lab Report</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-3">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header"><i class="fas fa-users"></i> Employee Report</div>
+            <div class="card-body">
+                <p>Department-wise employee count and attendance summary.</p>
+                <a href="{% url 'reports:employee_report' %}" class="btn btn-primary">View Employee Report</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

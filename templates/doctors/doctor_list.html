@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+{% block title %}Doctors | {{ hospital_name }}{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="mb-0"><i class="bi bi-person-workspace me-2"></i>Doctors</h4>
+    <a href="{% url 'doctors:doctor_create' %}" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i>Add Doctor</a>
+</div>
+
+<div class="row">
+    {% for doctor in doctors %}
+    <div class="col-lg-4 col-md-6 mb-4">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                {% if doctor.user.profile.photo %}
+                <img src="{{ doctor.user.profile.photo.url }}" alt="Profile" class="rounded-circle mb-3" width="100" height="100">
+                {% else %}
+                <div class="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 100px; height: 100px; font-size: 2rem;">
+                    {{ doctor.user.get_full_name|first }}
+                </div>
+                {% endif %}
+                <h5 class="card-title">{{ doctor.user.get_full_name|default:doctor.user.username }}</h5>
+                <p class="text-muted mb-2">{{ doctor.specialization }}</p>
+                <p class="text-muted mb-2"><i class="bi bi-building me-1"></i>{{ doctor.department }}</p>
+                <p class="fw-bold text-primary mb-3">Fee: ৳{{ doctor.consultation_fee }}</p>
+                <span class="badge bg-{% if doctor.is_available %}success{% else %}secondary{% endif %} mb-3">
+                    {% if doctor.is_available %}Available{% else %}Unavailable{% endif %}
+                </span>
+                <div class="d-flex justify-content-center gap-2">
+                    <a href="{% url 'doctors:doctor_detail' doctor.pk %}" class="btn btn-sm btn-outline-info"><i class="bi bi-eye"></i> View</a>
+                    <a href="{% url 'doctors:doctor_update' doctor.pk %}" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i> Edit</a>
+                    <a href="{% url 'doctors:doctor_delete' doctor.pk %}" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body text-center py-5">
+                <i class="bi bi-person-workspace text-muted" style="font-size: 3rem;"></i>
+                <h5 class="mt-3 text-muted">No doctors found</h5>
+                <p class="text-muted">Add your first doctor to get started.</p>
+                <a href="{% url 'doctors:doctor_create' %}" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i>Add Doctor</a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

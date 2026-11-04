@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+{% block title %}{% if form.instance.pk %}Edit Lab Order{% else %}New Lab Order{% endif %} - {{ block.super }}{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="bi bi-clipboard2-data"></i> {% if form.instance.pk %}Edit Lab Order{% else %}Create New Lab Order{% endif %}</h5>
+            </div>
+            <div class="card-body">
+                <form method="post" novalidate>{% csrf_token %}{% crispy form %}</form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+{% block title %}Doctor Schedules | {{ hospital_name }}{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="mb-0"><i class="bi bi-calendar-week me-2"></i>Doctor Schedules</h4>
+    <a href="{% url 'doctors:schedule_create' %}" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i>Add Schedule</a>
+</div>
+<div class="card">
+    <div class="card-header">
+        <form method="get" class="row g-2 align-items-end needs-validation">
+            <div class="col-md-3">
+                <label class="form-label">Filter by Doctor</label>
+                <select name="doctor" class="form-select" onchange="this.form.submit()">
+                    <option value="">All Doctors</option>
+                    {% for doctor in doctors %}
+                    <option value="{{ doctor.pk }}" {% if request.GET.doctor == doctor.pk|stringformat:"d" %}selected{% endif %}>Dr. {{ doctor.user.get_full_name|default:doctor.user.username }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </form>
+    </div>
+    <div class="card-body">
+        <table class="table table-hover datatable" id="{{ table_id }}">
+            <thead>
+                <tr><th>Doctor</th><th>Day</th><th>Start Time</th><th>End Time</th><th>Status</th><th>Actions</th></tr>
+            </thead>
+            <tbody>
+                {% for schedule in schedules %}
+                <tr>
+                    <td>Dr. {{ schedule.doctor.user.get_full_name|default:schedule.doctor.user.username }}</td>
+                    <td>{{ schedule.day }}</td>
+                    <td>{{ schedule.start_time|time:"h:i A" }}</td>
+                    <td>{{ schedule.end_time|time:"h:i A" }}</td>
+                    <td>
+                        <span class="badge bg-{% if schedule.is_active %}success{% else %}secondary{% endif %}">
+                            {% if schedule.is_active %}Active{% else %}Inactive{% endif %}
+                        </span>
+                    </td>
+                    <td>
+                        <a href="{% url 'doctors:schedule_update' schedule.pk %}" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i></a>
+                        <a href="{% url 'doctors:schedule_delete' schedule.pk %}" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="6" class="text-center text-muted py-4">No schedules found</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

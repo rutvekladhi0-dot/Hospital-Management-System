@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}{% if form.instance.pk %}Edit Training{% else %}Add Training{% endif %} - MEDCARE HOSPITAL & DIAGNOSTIC CENTER{% endblock %}
+{% block content %}
+<div class="row justify-content-center"><div class="col-lg-8">
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white"><h5 class="mb-0"><i class="bi bi-mortarboard"></i> {% if form.instance.pk %}Edit{% else %}Add{% endif %} Training</h5></div>
+        <div class="card-body">
+            <form method="post" novalidate class="needs-validation">{% csrf_token %}
+                {% if form.non_field_errors %}<div class="alert alert-danger">{% for e in form.non_field_errors %}<p class="mb-0">{{ e }}</p>{% endfor %}</div>{% endif %}
+                <div class="mb-3"><label class="form-label">Title <span class="text-danger">*</span></label>{{ form.title }}</div>
+                <div class="row"><div class="col-md-6 mb-3"><label class="form-label">Trainer</label>{{ form.trainer }}</div><div class="col-md-6 mb-3"><label class="form-label">Status</label>{{ form.status }}</div></div>
+                <div class="row"><div class="col-md-6 mb-3"><label class="form-label">Start Date</label>{{ form.start_date }}</div><div class="col-md-6 mb-3"><label class="form-label">End Date</label>{{ form.end_date }}</div></div>
+                <div class="mb-3"><label class="form-label">Description</label>{{ form.description }}</div>
+                <div class="mb-3"><label class="form-label">Participants</label>{{ form.employees }}</div>
+                <div class="d-flex justify-content-end gap-2"><a href="{% url 'hr:training_list' %}" class="btn btn-secondary">Cancel</a><button type="submit" class="btn btn-primary"><i class="bi bi-check-lg"></i> Save</button></div>
+            </form>
+        </div>
+    </div>
+</div></div>
+{% endblock %}

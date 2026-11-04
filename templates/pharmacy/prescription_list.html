@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% block title %}Prescriptions - MEDCARE HOSPITAL & DIAGNOSTIC CENTER{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4><i class="bi bi-clipboard2-pulse"></i> Prescriptions</h4>
+    <a href="{% url 'pharmacy:prescription_create' %}" class="btn btn-primary"><i class="bi bi-plus-lg"></i> New Prescription</a>
+</div>
+<div class="card shadow-sm">
+    <div class="card-body">
+        <div class="row g-3 mb-3">
+            <div class="col-md-3">
+                <select class="form-select" id="statusFilter" onchange="filterTable()">
+                    <option value="">All Status</option>
+                    <option value="dispensed">Dispensed</option>
+                    <option value="pending">Pending</option>
+                    <option value="partial">Partially Dispensed</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <input type="text" class="form-control" placeholder="Search..." id="searchInput" onkeyup="filterTable()">
+            </div>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover datatable" id="prescriptionTable">
+                <thead class="table-dark">
+                    <tr>
+                        <th>#</th>
+                        <th>Prescription #</th>
+                        <th>Patient</th>
+                        <th>Doctor</th>
+                        <th>Date</th>
+                        <th>Items</th>
+                        <th>Dispensed Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for rx in prescriptions %}
+                    <tr data-status="{{ rx.dispensed_status }}">
+                        <td>{{ forloop.counter }}</td>
+                        <td><strong>{{ rx.prescription_number }}</strong></td>
+                        <td>{{ rx.patient.full_name|default:rx.patient }}</td>
+                        <td>Dr. {{ rx.doctor.get_full_name|default:rx.doctor }}</td>
+                        <td>{{ rx.created_at|date:"d-M-Y" }}</td>
+                        <td><span class="badge bg-info">{{ rx.items.count }}</span></td>
+                        <td>
+                            {% if rx.dispensed_status == 'dispensed' %}
+                            <span class="badge bg-success">Dispensed</span>
+                            {% elif rx.dispensed_status == 'partial' %}
+                            <span class="badge bg-warning text-dark">Partial</span>
+                            {% else %}
+                            <span class="badge bg-secondary">Pending</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="btn-group btn-group-sm">
+                                <a href="{% url 'pharmacy:prescription_detail' rx.pk %}" class="btn btn-outline-info"><i class="bi bi-eye"></i></a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="8" class="text-center py-4">
+                            <i class="bi bi-clipboard2-pulse text-muted" style="font-size:2rem;"></i>
+                            <p class="mt-2 text-muted">No prescriptions found.</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function filterTable() {
+    var status = document.getElementById('statusFilter').value.toLowerCase();
+    var search = document.getElementById('searchInput').value.toLowerCase();
+    document.querySelectorAll('#prescriptionTable tbody tr').forEach(function(row) {
+        var rowStatus = (row.dataset.status || '').toLowerCase();
+        var text = row.textContent.toLowerCase();
+        var matchStatus = !status || rowStatus === status;
+        var matchSearch = !search || text.includes(search);
+        row.style.display = (matchStatus && matchSearch) ? '' : 'none';
+    });
+}
+</script>
+{% endblock %}

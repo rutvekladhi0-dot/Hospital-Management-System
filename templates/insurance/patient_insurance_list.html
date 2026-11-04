@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Patient Insurance - MEDCARE HOSPITAL & DIAGNOSTIC CENTER{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4><i class="bi bi-person-check"></i> Patient Insurance Records</h4>
+    <a href="{% url 'insurance:patient_insurance_create' %}" class="btn btn-primary"><i class="bi bi-plus-lg"></i> Add Record</a>
+</div>
+<div class="card shadow-sm">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover datatable">
+                <thead class="table-dark">
+                    <tr><th>#</th><th>Patient</th><th>Provider</th><th>Plan</th><th>Policy #</th><th>Expiry</th><th>Status</th><th>Actions</th></tr>
+                </thead>
+                <tbody>
+                    {% for pi in patient_insurances %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ pi.patient.full_name|default:pi.patient }}</td>
+                        <td>{{ pi.provider.name }}</td>
+                        <td>{{ pi.plan.name }}</td>
+                        <td><code>{{ pi.policy_number }}</code></td>
+                        <td>{{ pi.expiry_date|date:"d-M-Y"|default:"-" }}</td>
+                        <td>{% if pi.is_active %}<span class="badge bg-success">Active</span>{% else %}<span class="badge bg-secondary">Inactive</span>{% endif %}</td>
+                        <td><div class="btn-group btn-group-sm"><a href="{% url 'insurance:patient_insurance_update' pi.pk %}" class="btn btn-outline-primary"><i class="bi bi-pencil"></i></a><a href="{% url 'insurance:patient_insurance_delete' pi.pk %}" class="btn btn-outline-danger" onclick="return confirm('Delete?')"><i class="bi bi-trash"></i></a></div></td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="8" class="text-center py-4"><i class="bi bi-person-check text-muted" style="font-size:2rem;"></i><p class="mt-2 text-muted">No patient insurance records.</p></td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

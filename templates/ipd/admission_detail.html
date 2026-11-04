@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}Admission {{ admission.admission_number }} - MEDCARE HOSPITAL & DIAGNOSTIC CENTER{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4><i class="bi bi-person-workspace"></i> Admission {{ admission.admission_number }}</h4>
+    <div>
+        {% if admission.status == 'Admitted' %}
+        <a href="{% url 'ipd:discharge' admission.pk %}" class="btn btn-success"><i class="bi bi-box-arrow-right"></i> Discharge</a>
+        <a href="{% url 'ipd:bed_transfer' admission.pk %}" class="btn btn-warning"><i class="bi bi-arrow-left-right"></i> Transfer</a>
+        {% endif %}
+        <a href="{% url 'ipd:admission_list' %}" class="btn btn-secondary"><i class="bi bi-arrow-left"></i> Back</a>
+    </div>
+</div>
+<div class="row">
+    <div class="col-lg-6">
+        <div class="card shadow-sm mb-4">
+            <div class="card-header"><h6 class="mb-0">Admission Details</h6></div>
+            <div class="card-body">
+                <table class="table table-borderless">
+                    <tr><th style="width:40%">Admission #</th><td>{{ admission.admission_number }}</td></tr>
+                    <tr><th>Patient</th><td>{{ admission.patient.full_name }}</td></tr>
+                    <tr><th>Doctor</th><td>Dr. {{ admission.doctor.full_name }}</td></tr>
+                    <tr><th>Ward / Bed</th><td>{{ admission.bed.ward.name }} / {{ admission.bed.bed_number }}</td></tr>
+                    <tr><th>Admission Date</th><td>{{ admission.admission_date|date:"d-M-Y H:i" }}</td></tr>
+                    <tr><th>Expected Discharge</th><td>{{ admission.expected_discharge_date|date:"d-M-Y"|default:"-" }}</td></tr>
+                    <tr><th>Status</th><td>
+                        {% if admission.status == 'Admitted' %}<span class="badge bg-danger fs-6">Active</span>
+                        {% elif admission.status == 'Discharged' %}<span class="badge bg-success fs-6">Discharged</span>
+                        {% else %}<span class="badge bg-info fs-6">Transferred</span>{% endif %}
+                    </td></tr>
+                    <tr><th>Diagnosis</th><td>{{ admission.diagnosis|default:"-" }}</td></tr>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="card shadow-sm mb-4">
+            <div class="card-header"><h6 class="mb-0"><i class="bi bi-clock-history"></i> Admission Timeline</h6></div>
+            <div class="card-body">
+                <div class="list-group list-group-flush">
+                    <div class="list-group-item">
+                        <div class="d-flex justify-content-between"><strong>Admitted</strong><small>{{ admission.admission_date|date:"d-M-Y H:i" }}</small></div>
+                        <small class="text-muted">Ward: {{ admission.bed.ward.name }}, Bed: {{ admission.bed.bed_number }}</small>
+                    </div>
+                    {% for transfer in admission.bed_transfers.all %}
+                    <div class="list-group-item">
+                        <div class="d-flex justify-content-between"><strong>Transferred</strong><small>{{ transfer.created_at|date:"d-M-Y H:i" }}</small></div>
+                        <small class="text-muted">From {{ transfer.from_bed }} to {{ transfer.to_bed }}</small>
+                    </div>
+                    {% endfor %}
+                    {% if admission.discharge %}
+                    <div class="list-group-item">
+                        <div class="d-flex justify-content-between"><strong>Discharged</strong><small>{{ admission.discharge.discharge_date|date:"d-M-Y H:i" }}</small></div>
+                        <small class="text-muted">{{ admission.discharge.discharge_summary|default:"" }}</small>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

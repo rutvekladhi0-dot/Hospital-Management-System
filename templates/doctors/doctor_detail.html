@@ -1,0 +1,162 @@
+{% extends "base.html" %}
+{% block title %}Dr. {{ object.user.get_full_name|default:object.user.username }} | {{ hospital_name }}{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="mb-0"><i class="bi bi-person-workspace me-2"></i>Doctor Profile</h4>
+    <div>
+        <a href="{% url 'doctors:doctor_update' object.pk %}" class="btn btn-outline-primary"><i class="bi bi-pencil me-1"></i>Edit</a>
+        <a href="{% url 'doctors:doctor_list' %}" class="btn btn-outline-secondary"><i class="bi bi-arrow-left me-1"></i>Back</a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-4">
+        <div class="card mb-4">
+            <div class="card-body text-center">
+                {% if object.user.profile.photo %}
+                <img src="{{ object.user.profile.photo.url }}" alt="Profile" class="rounded-circle mb-3" width="150" height="150">
+                {% else %}
+                <div class="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 150px; height: 150px; font-size: 3rem;">
+                    {{ object.user.get_full_name|first }}
+                </div>
+                {% endif %}
+                <h4>Dr. {{ object.user.get_full_name|default:object.user.username }}</h4>
+                <p class="text-muted">{{ object.specialization }}</p>
+                <span class="badge bg-{% if object.is_available %}success{% else %}secondary{% endif %} mb-3">
+                    {% if object.is_available %}Available{% else %}Unavailable{% endif %}
+                </span>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header"><h6 class="mb-0">Professional Information</h6></div>
+            <div class="card-body">
+                <table class="table table-borderless mb-0">
+                    <tr><th width="45%">Department</th><td>{{ object.department }}</td></tr>
+                    <tr><th>Specialization</th><td>{{ object.specialization }}</td></tr>
+                    <tr><th>Consultation Fee</th><td>৳{{ object.consultation_fee }}</td></tr>
+                    <tr><th>Experience</th><td>{{ object.experience_years }} years</td></tr>
+                    <tr><th>Qualification</th><td>{{ object.qualification|default:"-" }}</td></tr>
+                    <tr><th>License No.</th><td>{{ object.license_number|default:"-" }}</td></tr>
+                </table>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header"><h6 class="mb-0">Contact Information</h6></div>
+            <div class="card-body">
+                <table class="table table-borderless mb-0">
+                    <tr><th width="45%">Email</th><td>{{ object.user.email }}</td></tr>
+                    <tr><th>Phone</th><td>{{ object.phone|default:"-" }}</td></tr>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-8">
+        <ul class="nav nav-tabs mb-4" id="doctorTabs" role="tablist">
+            <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" href="#schedule">Schedule</a></li>
+            <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#availability">Availability</a></li>
+            <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#appointments">Appointments</a></li>
+        </ul>
+
+        <div class="tab-content">
+            <div class="tab-pane fade show active" id="schedule">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h6 class="mb-0">Weekly Schedule</h6>
+                        <a href="{% url 'doctors:schedule_manage' object.pk %}" class="btn btn-sm btn-primary"><i class="bi bi-pencil me-1"></i>Manage Schedule</a>
+                    </div>
+                    <div class="card-body">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Day</th>
+                                    <th>Start Time</th>
+                                    <th>End Time</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for schedule in schedules %}
+                                <tr>
+                                    <td>{{ schedule.get_day_display }}</td>
+                                    <td>{{ schedule.start_time|time:"h:i A" }}</td>
+                                    <td>{{ schedule.end_time|time:"h:i A" }}</td>
+                                    <td>
+                                        <span class="badge bg-{% if schedule.is_active %}success{% else %}secondary{% endif %}">
+                                            {% if schedule.is_active %}Active{% else %}Inactive{% endif %}
+                                        </span>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr><td colspan="4" class="text-center text-muted">No schedule configured</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-pane fade" id="availability">
+                <div class="card">
+                    <div class="card-header"><h6 class="mb-0">Availability Status</h6></div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="card bg-{% if object.is_available %}success{% else %}danger{% endif %} text-white">
+                                    <div class="card-body text-center">
+                                        <i class="bi bi-{% if object.is_available %}check-circle{% else %}x-circle{% endif %}" style="font-size: 2rem;"></i>
+                                        <h5 class="mt-2">{% if object.is_available %}Available for Appointments{% else %}Currently Unavailable{% endif %}</h5>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h6>Today's Appointments</h6>
+                                        <h2 class="text-primary">{{ today_appointments_count|default:"0" }}</h2>
+                                        <p class="text-muted mb-0"> appointments scheduled</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-pane fade" id="appointments">
+                <div class="card">
+                    <div class="card-header"><h6 class="mb-0">Recent Appointments</h6></div>
+                    <div class="card-body">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr><th>Patient</th><th>Date</th><th>Time</th><th>Status</th><th>Actions</th></tr>
+                            </thead>
+                            <tbody>
+                                {% for appointment in recent_appointments %}
+                                <tr>
+                                    <td>{{ appointment.patient.user.get_full_name|default:appointment.patient.user.username }}</td>
+                                    <td>{{ appointment.date|date:"d M Y" }}</td>
+                                    <td>{{ appointment.time|time:"h:i A" }}</td>
+                                    <td>
+                                        <span class="badge bg-{% if appointment.status == 'completed' %}success{% elif appointment.status == 'cancelled' %}danger{% elif appointment.status == 'confirmed' %}info{% else %}warning{% endif %}">
+                                            {{ appointment.get_status_display }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <a href="{% url 'appointments:appointment_detail' appointment.pk %}" class="btn btn-sm btn-outline-info"><i class="bi bi-eye"></i></a>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr><td colspan="5" class="text-center text-muted">No appointments found</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

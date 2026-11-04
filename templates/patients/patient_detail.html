@@ -1,0 +1,176 @@
+{% extends "base.html" %}
+{% block title %}Patient Profile | {{ hospital_name }}{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="mb-0"><i class="bi bi-person me-2"></i>Patient Profile</h4>
+    <div>
+        <a href="{% url 'patients:patient_update' object.pk %}" class="btn btn-outline-primary"><i class="bi bi-pencil me-1"></i>Edit</a>
+        <a href="{% url 'patients:patient_list' %}" class="btn btn-outline-secondary"><i class="bi bi-arrow-left me-1"></i>Back</a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-4">
+        <div class="card mb-4">
+            <div class="card-body text-center">
+                {% if object.user.profile.photo %}
+                <img src="{{ object.user.profile.photo.url }}" alt="Profile" class="rounded-circle mb-3" width="120" height="120">
+                {% else %}
+                <div class="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 120px; height: 120px; font-size: 2.5rem;">
+                    {{ object.user.get_full_name|first }}
+                </div>
+                {% endif %}
+                <h5>{{ object.user.get_full_name|default:object.user.username }}</h5>
+                <p class="text-muted">Patient ID: {{ object.patient_id }}</p>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header"><h6 class="mb-0">Personal Information</h6></div>
+            <div class="card-body">
+                <table class="table table-borderless mb-0">
+                    <tr><th width="40%">Phone</th><td>{{ object.phone }}</td></tr>
+                    <tr><th>Email</th><td>{{ object.user.email }}</td></tr>
+                    <tr><th>Date of Birth</th><td>{{ object.date_of_birth|date:"d M Y"|default:"-" }}</td></tr>
+                    <tr><th>Gender</th><td>{{ object.get_gender_display|default:"-" }}</td></tr>
+                    <tr><th>Blood Group</th><td>{{ object.blood_group|default:"-" }}</td></tr>
+                    <tr><th>Address</th><td>{{ object.address|default:"-" }}</td></tr>
+                    <tr><th>Emergency Contact</th><td>{{ object.emergency_contact|default:"-" }}</td></tr>
+                    <tr><th>Insurance No.</th><td>{% if object.insurances.first %}{{ object.insurances.first.plan.name }} ({{ object.insurances.first.policy_number }}){% elif object.insurance_provider %}{{ object.insurance_provider.name }}{% else %}-{% endif %}</td></tr>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-8">
+        <ul class="nav nav-tabs mb-4" id="patientTabs" role="tablist">
+            <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" href="#medical-records">Medical Records</a></li>
+            <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#appointments">Appointments</a></li>
+            <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#bills">Bills</a></li>
+            <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#documents">Documents</a></li>
+        </ul>
+
+        <div class="tab-content">
+            <div class="tab-pane fade show active" id="medical-records">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h6 class="mb-0">Medical Records</h6>
+                        <a href="{% url 'patients:medical_record_create' %}" class="btn btn-sm btn-primary"><i class="bi bi-plus-lg me-1"></i>Add Record</a>
+                    </div>
+                    <div class="card-body">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr><th>Date</th><th>Doctor</th><th>Diagnosis</th><th>Actions</th></tr>
+                            </thead>
+                            <tbody>
+                                {% for record in medical_records %}
+                                <tr>
+                                    <td>{{ record.created_at|date:"d M Y" }}</td>
+                                    <td>Dr. {{ record.doctor.get_full_name|default:record.doctor.username }}</td>
+                                    <td>{{ record.diagnosis|truncatewords:5 }}</td>
+                                    <td>
+                                        <a href="{% url 'patients:medical_record_detail' record.pk %}" class="btn btn-sm btn-outline-info"><i class="bi bi-eye"></i></a>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr><td colspan="4" class="text-center text-muted">No medical records found</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-pane fade" id="appointments">
+                <div class="card">
+                    <div class="card-header"><h6 class="mb-0">Appointments</h6></div>
+                    <div class="card-body">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr><th>Doctor</th><th>Date</th><th>Time</th><th>Status</th></tr>
+                            </thead>
+                            <tbody>
+                                {% for appointment in appointments %}
+                                <tr>
+                                    <td>Dr. {{ appointment.doctor.user.get_full_name|default:appointment.doctor.user.username }}</td>
+                                    <td>{{ appointment.date|date:"d M Y" }}</td>
+                                    <td>{{ appointment.time|time:"h:i A" }}</td>
+                                    <td>
+                                        <span class="badge bg-{% if appointment.status == 'completed' %}success{% elif appointment.status == 'cancelled' %}danger{% elif appointment.status == 'confirmed' %}info{% else %}warning{% endif %}">
+                                            {{ appointment.get_status_display }}
+                                        </span>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr><td colspan="4" class="text-center text-muted">No appointments found</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-pane fade" id="bills">
+                <div class="card">
+                    <div class="card-header"><h6 class="mb-0">Bills</h6></div>
+                    <div class="card-body">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr><th>Bill No.</th><th>Date</th><th>Amount</th><th>Status</th></tr>
+                            </thead>
+                            <tbody>
+                                {% for bill in bills %}
+                                <tr>
+                                    <td>{{ bill.bill_number }}</td>
+                                    <td>{{ bill.created_at|date:"d M Y" }}</td>
+                                    <td>৳{{ bill.total_amount }}</td>
+                                    <td>
+                                        <span class="badge bg-{% if bill.status == 'paid' %}success{% elif bill.status == 'partial' %}warning{% else %}danger{% endif %}">
+                                            {{ bill.get_status_display }}
+                                        </span>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr><td colspan="4" class="text-center text-muted">No bills found</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-pane fade" id="documents">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h6 class="mb-0">Documents</h6>
+                        <a href="{% url 'patients:patient_document_upload' object.pk %}" class="btn btn-sm btn-primary"><i class="bi bi-upload me-1"></i>Upload</a>
+                    </div>
+                    <div class="card-body">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr><th>Title</th><th>Type</th><th>Uploaded By</th><th>Date</th><th>Actions</th></tr>
+                            </thead>
+                            <tbody>
+                                {% for doc in documents %}
+                                <tr>
+                                    <td>{{ doc.title }}</td>
+                                    <td><span class="badge bg-secondary">{{ doc.get_document_type_display }}</span></td>
+                                    <td>{{ doc.uploaded_by.get_full_name|default:doc.uploaded_by.username }}</td>
+                                    <td>{{ doc.uploaded_at|date:"d M Y" }}</td>
+                                    <td>
+                                        <a href="{{ doc.file.url }}" class="btn btn-sm btn-outline-primary" target="_blank"><i class="bi bi-download"></i></a>
+                                        <a href="{% url 'patients:patient_document_delete' doc.pk %}" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></a>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr><td colspan="5" class="text-center text-muted">No documents found</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

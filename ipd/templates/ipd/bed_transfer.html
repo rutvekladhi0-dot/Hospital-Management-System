@@ -1,0 +1,31 @@
+{% extends "base/base.html" %}
+{% load crispy_forms_tags %}
+
+{% block title %}Transfer Bed - MEDCARE{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-6 offset-md-3">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-exchange-alt"></i> Transfer Bed</h5>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <strong>Patient:</strong> {{ admission.patient }}<br>
+                    <strong>Current Ward:</strong> {{ admission.ward }} |
+                    <strong>Current Bed:</strong> {{ admission.bed.bed_number }}
+                </div>
+                <form method="post">
+                    {% csrf_token %}
+                    {{ form|crispy }}
+                    <div class="mt-3">
+                        <button type="submit" class="btn btn-info"><i class="fas fa-exchange-alt"></i> Transfer</button>
+                        <a href="{% url 'ipd:admission_detail' admission.pk %}" class="btn btn-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

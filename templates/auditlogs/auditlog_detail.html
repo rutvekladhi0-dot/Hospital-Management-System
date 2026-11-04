@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Audit Log Detail - MEDCARE HOSPITAL & DIAGNOSTIC CENTER{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4><i class="bi bi-journal-text"></i> Audit Log Detail</h4>
+    <a href="{% url 'auditlogs:audit_log_list' %}" class="btn btn-secondary"><i class="bi bi-arrow-left"></i> Back</a>
+</div>
+<div class="card shadow-sm">
+    <div class="card-body">
+        <table class="table table-borderless">
+            <tr><th style="width:25%">ID</th><td>{{ log.pk }}</td></tr>
+            <tr><th>User</th><td>{{ log.user.get_full_name|default:log.user|default:"System" }}</td></tr>
+            <tr><th>Action</th><td><span class="badge bg-{{ log.action_color }}">{{ log.action }}</span></td></tr>
+            <tr><th>Model</th><td><code>{{ log.model_name|default:"-" }}</code></td></tr>
+            <tr><th>Object ID</th><td>{{ log.object_id|default:"-" }}</td></tr>
+            <tr><th>IP Address</th><td>{{ log.ip_address|default:"-" }}</td></tr>
+            <tr><th>Timestamp</th><td>{{ log.timestamp|date:"d-M-Y H:i:s" }}</td></tr>
+            <tr><th>Path</th><td>{{ log.path|default:"-" }}</td></tr>
+            {% if log.description %}
+            <tr><th>Description</th><td>{{ log.description }}</td></tr>
+            {% endif %}
+            {% if log.old_value %}
+            <tr><th>Old Value</th><td><pre class="bg-light p-2 rounded">{{ log.old_value }}</pre></td></tr>
+            {% endif %}
+            {% if log.new_value %}
+            <tr><th>New Value</th><td><pre class="bg-light p-2 rounded">{{ log.new_value }}</pre></td></tr>
+            {% endif %}
+        </table>
+    </div>
+</div>
+{% endblock %}

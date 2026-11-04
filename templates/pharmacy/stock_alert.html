@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}Stock Alerts - MEDCARE HOSPITAL & DIAGNOSTIC CENTER{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4><i class="bi bi-exclamation-triangle text-danger"></i> Low Stock Alerts</h4>
+    <a href="{% url 'pharmacy:medicine_list' %}" class="btn btn-secondary"><i class="bi bi-arrow-left"></i> Back to Medicines</a>
+</div>
+
+<div class="alert alert-danger d-flex align-items-center mb-4">
+    <i class="bi bi-exclamation-diamond-fill me-2 fs-4"></i>
+    <div>
+        <strong>{{ medicines.count }} medicine(s) are running below minimum stock level!</strong>
+        <p class="mb-0">Please reorder to avoid stockouts.</p>
+    </div>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover datatable">
+                <thead class="table-dark">
+                    <tr>
+                        <th>#</th>
+                        <th>Medicine</th>
+                        <th>Generic</th>
+                        <th>Category</th>
+                        <th>Current Stock</th>
+                        <th>Minimum Stock</th>
+                        <th>Deficit</th>
+                        <th>Supplier</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for med in medicines %}
+                    <tr class="table-danger">
+                        <td>{{ forloop.counter }}</td>
+                        <td><strong>{{ med.name }}</strong></td>
+                        <td>{{ med.generic_name|default:"-" }}</td>
+                        <td><span class="badge bg-info">{{ med.category.name|default:"-" }}</span></td>
+                        <td><span class="badge bg-danger fs-6">{{ med.stock_quantity }}</span></td>
+                        <td>{{ med.minimum_stock }}</td>
+                        <td class="text-danger fw-bold">-{{ med.minimum_stock|add:med.stock_quantity|add:"-" }}</td>
+                        <td>{{ med.supplier|default:"-" }}</td>
+                        <td>
+                            <a href="{% url 'pharmacy:medicine_update' med.pk %}" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i> Update Stock</a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="9" class="text-center py-4">
+                            <i class="bi bi-check-circle text-success" style="font-size:2rem;"></i>
+                            <p class="mt-2 text-muted">All medicines are sufficiently stocked!</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

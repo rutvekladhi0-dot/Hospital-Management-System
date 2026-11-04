@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% block title %}Invoices - MEDCARE HOSPITAL & DIAGNOSTIC CENTER{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4><i class="bi bi-receipt"></i> Invoices</h4>
+    <a href="{% url 'billing:invoice_create' %}" class="btn btn-primary"><i class="bi bi-plus-lg"></i> Create Invoice</a>
+</div>
+<div class="card shadow-sm">
+    <div class="card-body">
+        <div class="row g-3 mb-3">
+            <div class="col-md-2">
+                <select class="form-select" id="statusFilter" onchange="filterTable()">
+                    <option value="">All Status</option>
+                    <option value="paid">Paid</option>
+                    <option value="partial">Partial</option>
+                    <option value="unpaid">Unpaid</option>
+                    <option value="cancelled">Cancelled</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <input type="date" class="form-control" id="dateFrom" onchange="filterTable()">
+            </div>
+            <div class="col-md-3">
+                <input type="text" class="form-control" placeholder="Search invoices..." id="searchInput" onkeyup="filterTable()">
+            </div>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover datatable" id="invoiceTable">
+                <thead class="table-dark">
+                    <tr>
+                        <th>#</th>
+                        <th>Invoice #</th>
+                        <th>Patient</th>
+                        <th>Total (৳)</th>
+                        <th>Paid (৳)</th>
+                        <th>Due (৳)</th>
+                        <th>Status</th>
+                        <th>Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for inv in invoices %}
+                    <tr data-status="{{ inv.status }}" data-date="{{ inv.created_at|date:'Y-m-d' }}">
+                        <td>{{ forloop.counter }}</td>
+                        <td><strong>{{ inv.invoice_number }}</strong></td>
+                        <td>{{ inv.patient.full_name|default:inv.patient }}</td>
+                        <td>{{ inv.total_amount|floatformat:2 }}</td>
+                        <td class="text-success">{{ inv.paid_amount|floatformat:2 }}</td>
+                        <td class="{% if inv.due_amount > 0 %}text-danger fw-bold{% endif %}">{{ inv.due_amount|floatformat:2 }}</td>
+                        <td>
+                            {% if inv.status == 'Paid' %}
+                            <span class="badge bg-success">Paid</span>
+                            {% elif inv.status == 'Partial' %}
+                            <span class="badge bg-warning text-dark">Partial</span>
+                            {% elif inv.status == 'Cancelled' %}
+                            <span class="badge bg-dark">Cancelled</span>
+                            {% else %}
+                            <span class="badge bg-danger">Unpaid</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ inv.created_at|date:"d-M-Y" }}</td>
+                        <td>
+                            <div class="btn-group btn-group-sm">
+                                <a href="{% url 'billing:invoice_detail' inv.pk %}" class="btn btn-outline-info" title="View"><i class="bi bi-eye"></i></a>
+                                <a href="{% url 'billing:invoice_print' inv.pk %}" class="btn btn-outline-secondary" title="Print" target="_blank"><i class="bi bi-printer"></i></a>
+                                {% if inv.due_amount > 0 %}
+                                <a href="{% url 'billing:payment_create' inv.pk %}" class="btn btn-outline-success" title="Payment"><i class="bi bi-cash"></i></a>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="9" class="text-center py-4"><i class="bi bi-receipt text-muted" style="font-size:2rem;"></i><p class="mt-2 text-muted">No invoices found.</p></td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function filterTable() {
+    var status = document.getElementById('statusFilter').value.toLowerCase();
+    var dateFrom = document.getElementById('dateFrom').value;
+    var search = document.getElementById('searchInput').value.toLowerCase();
+    document.querySelectorAll('#invoiceTable tbody tr').forEach(function(row) {
+        var rs = (row.dataset.status||'').toLowerCase();
+        var rd = row.dataset.date||'';
+        var rt = row.textContent.toLowerCase();
+        row.style.display = ((!status || rs===status) && (!dateFrom || rd>=dateFrom) && (!search || rt.includes(search))) ? '' : 'none';
+    });
+}
+</script>
+{% endblock %}

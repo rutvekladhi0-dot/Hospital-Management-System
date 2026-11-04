@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}{% if form.instance.pk %}Edit{% else %}Add{% endif %} Patient Insurance - MEDCARE HOSPITAL & DIAGNOSTIC CENTER{% endblock %}
+{% block content %}
+<div class="row justify-content-center"><div class="col-lg-7">
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white"><h5 class="mb-0"><i class="bi bi-person-check"></i> {% if form.instance.pk %}Edit{% else %}Add{% endif %} Patient Insurance</h5></div>
+        <div class="card-body">
+            <form method="post" novalidate class="needs-validation">{% csrf_token %}
+                {% if form.non_field_errors %}<div class="alert alert-danger">{% for e in form.non_field_errors %}<p class="mb-0">{{ e }}</p>{% endfor %}</div>{% endif %}
+                <div class="mb-3"><label class="form-label">Patient <span class="text-danger">*</span></label>{{ form.patient }}{% if form.patient.errors %}<div class="text-danger small">{{ form.patient.errors.0 }}</div>{% endif %}</div>
+                <div class="row"><div class="col-md-6 mb-3"><label class="form-label">Provider <span class="text-danger">*</span></label>{{ form.provider }}</div><div class="col-md-6 mb-3"><label class="form-label">Plan <span class="text-danger">*</span></label>{{ form.plan }}</div></div>
+                <div class="mb-3"><label class="form-label">Policy Number <span class="text-danger">*</span></label>{{ form.policy_number }}{% if form.policy_number.errors %}<div class="text-danger small">{{ form.policy_number.errors.0 }}</div>{% endif %}</div>
+                <div class="row"><div class="col-md-6 mb-3"><label class="form-label">Start Date</label>{{ form.start_date }}</div><div class="col-md-6 mb-3"><label class="form-label">Expiry Date</label>{{ form.expiry_date }}</div></div>
+                <div class="mb-3 form-check">{{ form.is_active }}<label class="form-check-label">Active</label></div>
+                <div class="d-flex justify-content-end gap-2"><a href="{% url 'insurance:patient_insurance_list' %}" class="btn btn-secondary">Cancel</a><button type="submit" class="btn btn-primary"><i class="bi bi-check-lg"></i> Save</button></div>
+            </form>
+        </div>
+    </div>
+</div></div>
+{% endblock %}

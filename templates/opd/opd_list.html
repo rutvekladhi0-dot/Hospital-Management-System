@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block title %}OPD Visits - MEDCARE HOSPITAL & DIAGNOSTIC CENTER{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4><i class="bi bi-hospital"></i> OPD Visits</h4>
+    <a href="{% url 'opd:opd_create' %}" class="btn btn-primary"><i class="bi bi-plus-lg"></i> New OPD Visit</a>
+</div>
+<div class="card shadow-sm">
+    <div class="card-body">
+        <div class="row g-3 mb-3">
+            <div class="col-md-2">
+                <select class="form-select" id="statusFilter" onchange="filterTable()">
+                    <option value="">All Status</option>
+                    <option value="waiting">Waiting</option>
+                    <option value="in-progress">In Progress</option>
+                    <option value="completed">Completed</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <input type="date" class="form-control" id="dateFilter" onchange="filterTable()" value="{{ today|date:'Y-m-d' }}">
+            </div>
+            <div class="col-md-3"><input type="text" class="form-control" placeholder="Search..." id="searchInput" onkeyup="filterTable()"></div>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover" id="opdTable">
+                <thead class="table-dark">
+                    <tr><th>#</th><th>OPD #</th><th>Patient</th><th>Doctor</th><th>Department</th><th>Date</th><th>Status</th><th>Actions</th></tr>
+                </thead>
+                <tbody>
+                    {% for opd in opd_visits %}
+                    <tr data-status="{{ opd.status }}" data-date="{{ opd.visit_date|date:'Y-m-d' }}">
+                        <td>{{ forloop.counter }}</td>
+                        <td><strong>{{ opd.opd_number }}</strong></td>
+                        <td>{{ opd.patient.full_name|default:opd.patient }}</td>
+                        <td>Dr. {{ opd.doctor.get_full_name|default:opd.doctor }}</td>
+                        <td>{{ opd.department.name|default:"-" }}</td>
+                        <td>{{ opd.visit_date|date:"d-M-Y" }}</td>
+                        <td>
+                            {% if opd.status == 'completed' %}<span class="badge bg-success">Completed</span>
+                            {% elif opd.status == 'in-progress' %}<span class="badge bg-primary">In Progress</span>
+                            {% else %}<span class="badge bg-warning text-dark">Waiting</span>{% endif %}
+                        </td>
+                        <td>
+                            <div class="btn-group btn-group-sm">
+                                <a href="{% url 'opd:opd_detail' opd.pk %}" class="btn btn-outline-info"><i class="bi bi-eye"></i></a>
+                                <a href="{% url 'opd:opd_update' opd.pk %}" class="btn btn-outline-primary"><i class="bi bi-pencil"></i></a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="8" class="text-center py-4"><i class="bi bi-hospital text-muted" style="font-size:2rem;"></i><p class="mt-2 text-muted">No OPD visits found.</p></td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+function filterTable() {
+    var s = document.getElementById('statusFilter').value.toLowerCase();
+    var d = document.getElementById('dateFilter').value;
+    var q = document.getElementById('searchInput').value.toLowerCase();
+    document.querySelectorAll('#opdTable tbody tr').forEach(function(row) {
+        var rs = (row.dataset.status||'').toLowerCase();
+        var rd = row.dataset.date||'';
+        var rt = row.textContent.toLowerCase();
+        row.style.display = ((!s || rs===s) && (!d || rd===d) && (!q || rt.includes(q))) ? '' : 'none';
+    });
+}
+</script>
+{% endblock %}

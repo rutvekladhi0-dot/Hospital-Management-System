@@ -1,0 +1,23 @@
+{% extends "base/base.html" %}
+
+{% block title %}Delete Invoice - MEDCARE{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-6 offset-md-3">
+        <div class="card border-danger">
+            <div class="card-header bg-danger text-white">
+                <h5><i class="fas fa-trash"></i> Delete Invoice</h5>
+            </div>
+            <div class="card-body">
+                <p>Are you sure you want to delete invoice <strong>{{ object.invoice_number }}</strong>?</p>
+                <form method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger"><i class="fas fa-trash"></i> Delete</button>
+                    <a href="{% url 'billing:invoice_list' %}" class="btn btn-secondary">Cancel</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

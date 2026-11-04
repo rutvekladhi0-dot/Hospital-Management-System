@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+{% block title %}Leave Requests | {{ hospital_name }}{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="mb-0"><i class="bi bi-calendar-x me-2"></i>Leave Requests</h4>
+    <a href="{% url 'employees:leave_create' %}" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i>Request Leave</a>
+</div>
+<div class="card">
+    <div class="card-body">
+        <table class="table table-hover datatable" id="leaveTable">
+            <thead>
+                <tr><th>Employee</th><th>Type</th><th>From</th><th>To</th><th>Reason</th><th>Status</th><th>Actions</th></tr>
+            </thead>
+            <tbody>
+                {% for leave in leaves %}
+                <tr>
+                    <td>{{ leave.employee.user.get_full_name|default:leave.employee.user.username }}</td>
+                    <td>{{ leave.leave_type }}</td>
+                    <td>{{ leave.start_date|date:"d M Y" }}</td>
+                    <td>{{ leave.end_date|date:"d M Y" }}</td>
+                    <td>{{ leave.reason|truncatewords:5 }}</td>
+                    <td>
+                        <span class="badge bg-{% if leave.status == 'approved' %}success{% elif leave.status == 'rejected' %}danger{% elif leave.status == 'pending' %}warning{% else %}secondary{% endif %}">
+                            {{ leave.get_status_display }}
+                        </span>
+                    </td>
+                    <td>
+                        {% if leave.status == 'pending' %}
+                        <form method="post" action="{% url 'employees:leave_approve' leave.pk %}" class="d-inline needs-validation" novalidate>
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-sm btn-outline-success" title="Approve"><i class="bi bi-check-lg"></i></button>
+                        </form>
+                        <form method="post" action="{% url 'employees:leave_reject' leave.pk %}" class="d-inline needs-validation" novalidate>
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-sm btn-outline-danger" title="Reject"><i class="bi bi-x-lg"></i></button>
+                        </form>
+                        {% endif %}
+                        <a href="{% url 'employees:leave_detail' leave.pk %}" class="btn btn-sm btn-outline-info"><i class="bi bi-eye"></i></a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="7" class="text-center text-muted py-4">No leave requests found</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

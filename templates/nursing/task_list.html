@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block title %}Nursing Tasks - MEDCARE HOSPITAL & DIAGNOSTIC CENTER{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4><i class="bi bi-list-check"></i> Nursing Tasks</h4>
+    <a href="{% url 'nursing:task_create' %}" class="btn btn-primary"><i class="bi bi-plus-lg"></i> Assign Task</a>
+</div>
+<div class="card shadow-sm">
+    <div class="card-body">
+        <div class="row g-3 mb-3">
+            <div class="col-md-2">
+                <select class="form-select" id="statusFilter" onchange="filterTable()">
+                    <option value="">All Status</option>
+                    <option value="Pending">Pending</option>
+                    <option value="In-Progress">In Progress</option>
+                    <option value="Completed">Completed</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <select class="form-select" id="priorityFilter" onchange="filterTable()">
+                    <option value="">All Task Types</option>
+                    <option value="Medication">Medication</option>
+                    <option value="Vitals">Vitals</option>
+                    <option value="Wound Care">Wound Care</option>
+                    <option value="IV">IV</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+            <div class="col-md-3"><input type="text" class="form-control" placeholder="Search..." id="searchInput" onkeyup="filterTable()"></div>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover datatable" id="taskTable">
+                <thead class="table-dark">
+                    <tr><th>#</th><th>Task</th><th>Patient</th><th>Assigned To</th><th>Priority</th><th>Due</th><th>Status</th><th>Actions</th></tr>
+                </thead>
+                <tbody>
+                    {% for task in tasks %}
+                    <tr data-status="{{ task.status }}" data-priority="{{ task.task_type }}">
+                        <td>{{ forloop.counter }}</td>
+                        <td><strong>{{ task.task_type }}</strong><br><small class="text-muted">{{ task.description|truncatewords:8 }}</small></td>
+                        <td>{{ task.patient.full_name|default:"-" }}</td>
+                        <td>{{ task.assigned_to.get_full_name|default:"-" }}</td>
+                        <td>
+                            <span class="badge bg-secondary">{{ task.task_type }}</span>
+                        </td>
+                        <td>{{ task.scheduled_time|date:"d-M-Y H:i"|default:"-" }}</td>
+                        <td>
+                            {% if task.status == 'Completed' %}<span class="badge bg-success">Completed</span>
+                            {% elif task.status == 'In-Progress' %}<span class="badge bg-primary">In Progress</span>
+                            {% else %}<span class="badge bg-warning text-dark">Pending</span>{% endif %}
+                        </td>
+                        <td><div class="btn-group btn-group-sm"><a href="{% url 'nursing:task_update' task.pk %}" class="btn btn-outline-primary"><i class="bi bi-pencil"></i></a></div></td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="8" class="text-center py-4"><i class="bi bi-list-check text-muted" style="font-size:2rem;"></i><p class="mt-2 text-muted">No tasks found.</p></td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+function filterTable() {
+    var s = document.getElementById('statusFilter').value.toLowerCase();
+    var p = document.getElementById('priorityFilter').value.toLowerCase();
+    var q = document.getElementById('searchInput').value.toLowerCase();
+    document.querySelectorAll('#taskTable tbody tr').forEach(function(row) {
+        var rs = (row.dataset.status||'').toLowerCase();
+        var rp = (row.dataset.priority||'').toLowerCase();
+        var rt = row.textContent.toLowerCase();
+        row.style.display = ((!s || rs===s) && (!p || rp===p) && (!q || rt.includes(q))) ? '' : 'none';
+    });
+}
+</script>
+{% endblock %}

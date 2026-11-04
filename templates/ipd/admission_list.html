@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block title %}IPD Admissions - MEDCARE HOSPITAL & DIAGNOSTIC CENTER{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4><i class="bi bi-person-workspace"></i> IPD Admissions</h4>
+    <a href="{% url 'ipd:admission_create' %}" class="btn btn-primary"><i class="bi bi-plus-lg"></i> New Admission</a>
+</div>
+<div class="card shadow-sm">
+    <div class="card-body">
+        <div class="row g-3 mb-3">
+            <div class="col-md-2">
+                <select class="form-select" id="statusFilter" onchange="filterTable()">
+                    <option value="">All Status</option>
+                    <option value="Admitted">Active</option>
+                    <option value="Discharged">Discharged</option>
+                    <option value="Transferred">Transferred</option>
+                </select>
+            </div>
+            <div class="col-md-3"><input type="text" class="form-control" placeholder="Search..." id="searchInput" onkeyup="filterTable()"></div>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover datatable" id="admissionTable">
+                <thead class="table-dark">
+                    <tr><th>#</th><th>Admission #</th><th>Patient</th><th>Doctor</th><th>Ward/Bed</th><th>Admit Date</th><th>Status</th><th>Actions</th></tr>
+                </thead>
+                <tbody>
+                    {% for a in admissions %}
+                    <tr data-status="{{ a.status }}">
+                        <td>{{ forloop.counter }}</td>
+                        <td><strong>{{ a.admission_number }}</strong></td>
+                        <td>{{ a.patient.full_name|default:a.patient }}</td>
+                        <td>Dr. {{ a.doctor.user.get_full_name|default:a.doctor }}</td>
+                        <td>{{ a.bed.ward.name }} / {{ a.bed.bed_number }}</td>
+                        <td>{{ a.admission_date|date:"d-M-Y" }}</td>
+                        <td>
+                            {% if a.status == 'Admitted' %}<span class="badge bg-danger">Active</span>
+                            {% elif a.status == 'Discharged' %}<span class="badge bg-success">Discharged</span>
+                            {% else %}<span class="badge bg-info">Transferred</span>{% endif %}
+                        </td>
+                        <td>
+                            <div class="btn-group btn-group-sm">
+                                <a href="{% url 'ipd:admission_detail' a.pk %}" class="btn btn-outline-info"><i class="bi bi-eye"></i></a>
+                                {% if a.status == 'Admitted' %}
+                                <a href="{% url 'ipd:discharge' a.pk %}" class="btn btn-outline-success" title="Discharge"><i class="bi bi-box-arrow-right"></i></a>
+                                <a href="{% url 'ipd:bed_transfer' a.pk %}" class="btn btn-outline-warning" title="Transfer"><i class="bi bi-arrow-left-right"></i></a>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="8" class="text-center py-4"><i class="bi bi-person-workspace text-muted" style="font-size:2rem;"></i><p class="mt-2 text-muted">No admissions found.</p></td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+function filterTable() {
+    var s = document.getElementById('statusFilter').value.toLowerCase();
+    var q = document.getElementById('searchInput').value.toLowerCase();
+    document.querySelectorAll('#admissionTable tbody tr').forEach(function(row) {
+        var rs = (row.dataset.status||'').toLowerCase();
+        var rt = row.textContent.toLowerCase();
+        row.style.display = ((!s || rs===s) && (!q || rt.includes(q))) ? '' : 'none';
+    });
+}
+</script>
+{% endblock %}

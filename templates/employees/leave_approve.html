@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+{% block title %}Approve Leave Request | {{ hospital_name }}{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="mb-0"><i class="bi bi-calendar-check me-2"></i>Approve Leave Request</h4>
+    <a href="{% url 'employees:leave_list' %}" class="btn btn-outline-secondary"><i class="bi bi-arrow-left me-1"></i>Back</a>
+</div>
+<div class="row">
+    <div class="col-lg-7">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="bi bi-info-circle me-1"></i>Leave Details</h6>
+            </div>
+            <div class="card-body">
+                <table class="table table-borderless">
+                    <tr><th width="40%">Employee</th><td>{{ leave_request.employee.user.get_full_name|default:leave_request.employee.user.username }}</td></tr>
+                    <tr><th>Leave Type</th><td>{{ leave_request.leave_type }}</td></tr>
+                    <tr><th>Start Date</th><td>{{ leave_request.start_date|date:"d M Y" }}</td></tr>
+                    <tr><th>End Date</th><td>{{ leave_request.end_date|date:"d M Y" }}</td></tr>
+                    <tr><th>Reason</th><td>{{ leave_request.reason }}</td></tr>
+                    <tr>
+                        <th>Status</th>
+                        <td><span class="badge bg-{% if leave_request.status == 'approved' %}success{% elif leave_request.status == 'rejected' %}danger{% elif leave_request.status == 'pending' %}warning{% else %}secondary{% endif %}">{{ leave_request.get_status_display }}</span></td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-5">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="bi bi-clipboard-check me-1"></i>Review Decision</h6>
+            </div>
+            <div class="card-body">
+                <form method="post" novalidate class="needs-validation">
+                    {% csrf_token %}
+                    {{ form|crispy }}
+                    <div class="d-flex gap-2 mt-3">
+                        <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg me-1"></i>Submit</button>
+                        <a href="{% url 'employees:leave_list' %}" class="btn btn-outline-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

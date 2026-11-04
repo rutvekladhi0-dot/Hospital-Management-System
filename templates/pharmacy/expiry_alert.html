@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% block title %}Expiry Alerts - MEDCARE HOSPITAL & DIAGNOSTIC CENTER{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4><i class="bi bi-clock-history text-warning"></i> Expiry Alerts</h4>
+    <a href="{% url 'pharmacy:medicine_list' %}" class="btn btn-secondary"><i class="bi bi-arrow-left"></i> Back to Medicines</a>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card bg-danger text-white shadow">
+            <div class="card-body text-center">
+                <h3>{{ expired_count|default:"0" }}</h3>
+                <p class="mb-0">Expired Medicines</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card bg-warning text-dark shadow">
+            <div class="card-body text-center">
+                <h3>{{ expiring_soon_count|default:"0" }}</h3>
+                <p class="mb-0">Expiring in 30 Days</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card bg-info text-white shadow">
+            <div class="card-body text-center">
+                <h3>{{ expiring_month_count|default:"0" }}</h3>
+                <p class="mb-0">Expiring in 90 Days</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover datatable">
+                <thead class="table-dark">
+                    <tr>
+                        <th>#</th>
+                        <th>Medicine</th>
+                        <th>Batch No</th>
+                        <th>Stock</th>
+                        <th>Expiry Date</th>
+                        <th>Days Left</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for med in medicines %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td><strong>{{ med.name }}</strong></td>
+                        <td>{{ med.batch_number|default:"-" }}</td>
+                        <td>{{ med.stock_quantity }}</td>
+                        <td>{{ med.expiry_date|date:"d-M-Y" }}</td>
+                        <td>
+                            {% if med.expiry_date < today %}
+                            <span class="text-danger fw-bold">Expired</span>
+                            {% else %}
+                            {{ med.days_until_expiry }} days
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if med.expiry_date < today %}
+                            <span class="badge bg-danger">Expired</span>
+                            {% elif med.expiry_date < thirty_days %}
+                            <span class="badge bg-warning text-dark">Expiring Soon</span>
+                            {% else %}
+                            <span class="badge bg-info">Expiring in 90 Days</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="{% url 'pharmacy:medicine_update' med.pk %}" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i></a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="8" class="text-center py-4">
+                            <i class="bi bi-check-circle text-success" style="font-size:2rem;"></i>
+                            <p class="mt-2 text-muted">No medicines are expired or expiring soon.</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,41 @@
+{% extends "base/base.html" %}
+
+{% block title %}Payment {{ payment.id }} - MEDCARE{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="d-flex justify-content-between mb-3">
+            <h4><i class="fas fa-money-bill"></i> Payment Details</h4>
+            <a href="{% url 'billing:payment_list' %}" class="btn btn-secondary">Back</a>
+        </div>
+
+        <div class="card mb-3">
+            <div class="card-body">
+                <table class="table table-bordered">
+                    <tr><th>Payment ID</th><td>{{ payment.id }}</td></tr>
+                    <tr><th>Invoice</th><td><a href="{% url 'billing:invoice_detail' payment.invoice.pk %}">{{ payment.invoice.invoice_number }}</a></td></tr>
+                    <tr><th>Amount</th><td>{{ payment.amount|floatformat:2 }}</td></tr>
+                    <tr><th>Payment Method</th><td>{{ payment.payment_method }}</td></tr>
+                    <tr><th>Transaction ID</th><td>{{ payment.transaction_id|default:"N/A" }}</td></tr>
+                    <tr><th>Received By</th><td>{{ payment.received_by }}</td></tr>
+                    <tr><th>Notes</th><td>{{ payment.notes|default:"N/A" }}</td></tr>
+                    <tr><th>Date</th><td>{{ payment.created_at|date:"d M Y H:i" }}</td></tr>
+                </table>
+            </div>
+        </div>
+
+        {% if receipt %}
+        <div class="card">
+            <div class="card-header"><h6><i class="fas fa-receipt"></i> Payment Receipt</h6></div>
+            <div class="card-body">
+                <table class="table table-bordered">
+                    <tr><th>Receipt Number</th><td>{{ receipt.receipt_number }}</td></tr>
+                    <tr><th>Generated At</th><td>{{ receipt.generated_at|date:"d M Y H:i" }}</td></tr>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

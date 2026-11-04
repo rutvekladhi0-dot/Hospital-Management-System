@@ -1,0 +1,97 @@
+{% extends "base/base.html" %}
+
+{% block title %}Admission {{ admission.patient }} - MEDCARE{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="d-flex justify-content-between mb-3">
+            <h4><i class="fas fa-user-injured"></i> Admission Details</h4>
+            <div>
+                {% if admission.status == 'Admitted' %}
+                <a href="{% url 'ipd:discharge' admission.pk %}" class="btn btn-warning"><i class="fas fa-sign-out-alt"></i> Discharge</a>
+                <a href="{% url 'ipd:bed_transfer' admission.pk %}" class="btn btn-info"><i class="fas fa-exchange-alt"></i> Transfer Bed</a>
+                {% endif %}
+                <a href="{% url 'ipd:admission_list' %}" class="btn btn-secondary">Back</a>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card mb-3">
+                    <div class="card-header"><h6>Admission Details</h6></div>
+                    <div class="card-body">
+                        <table class="table table-bordered">
+                            <tr><th>Patient</th><td>{{ admission.patient }}</td></tr>
+                            <tr><th>Doctor</th><td>{{ admission.doctor }}</td></tr>
+                            <tr><th>Admission Date</th><td>{{ admission.admission_date|date:"d M Y H:i" }}</td></tr>
+                            <tr><th>Type</th><td>{{ admission.admission_type }}</td></tr>
+                            <tr><th>Status</th><td>
+                                {% if admission.status == 'Admitted' %}
+                                <span class="badge bg-success">{{ admission.status }}</span>
+                                {% elif admission.status == 'Discharged' %}
+                                <span class="badge bg-secondary">{{ admission.status }}</span>
+                                {% else %}
+                                <span class="badge bg-warning">{{ admission.status }}</span>
+                                {% endif %}
+                            </td></tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card mb-3">
+                    <div class="card-header"><h6>Ward & Bed</h6></div>
+                    <div class="card-body">
+                        <table class="table table-bordered">
+                            <tr><th>Ward</th><td>{{ admission.ward }}</td></tr>
+                            <tr><th>Bed Number</th><td>{{ admission.bed.bed_number }}</td></tr>
+                            <tr><th>Bed Type</th><td>{{ admission.bed.bed_type }}</td></tr>
+                            <tr><th>Daily Rate</th><td>{{ admission.bed.daily_rate|floatformat:2 }}</td></tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mb-3">
+            <div class="card-header"><h6>Diagnosis</h6></div>
+            <div class="card-body">{{ admission.diagnosis|linebreaksbr }}</div>
+        </div>
+
+        {% if admission.discharge_date %}
+        <div class="card mb-3">
+            <div class="card-header"><h6>Discharge Information</h6></div>
+            <div class="card-body">
+                <p><strong>Date:</strong> {{ admission.discharge_date|date:"d M Y H:i" }}</p>
+                <p><strong>Notes:</strong> {{ admission.discharge_notes|linebreaksbr|default:"N/A" }}</p>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if transfers %}
+        <div class="card mb-3">
+            <div class="card-header"><h6>Bed Transfer History</h6></div>
+            <div class="card-body">
+                <table class="table table-sm table-bordered">
+                    <thead>
+                        <tr><th>Date</th><th>From</th><th>To</th><th>Reason</th><th>By</th></tr>
+                    </thead>
+                    <tbody>
+                        {% for transfer in transfers %}
+                        <tr>
+                            <td>{{ transfer.transfer_date|date:"d M Y H:i" }}</td>
+                            <td>{{ transfer.from_ward }} - {{ transfer.from_bed }}</td>
+                            <td>{{ transfer.to_ward }} - {{ transfer.to_bed }}</td>
+                            <td>{{ transfer.reason|default:"N/A" }}</td>
+                            <td>{{ transfer.transferred_by }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

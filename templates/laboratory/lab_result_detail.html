@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% block title %}Lab Result - MEDCARE HOSPITAL & DIAGNOSTIC CENTER{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4><i class="bi bi-file-earmark-medical"></i> Lab Results - {{ order.order_number }}</h4>
+    <div>
+        <a href="{% url 'laboratory:report_print' order.pk %}" class="btn btn-outline-secondary" target="_blank"><i class="bi bi-printer"></i> Print</a>
+        <a href="{% url 'laboratory:order_detail' order.pk %}" class="btn btn-secondary"><i class="bi bi-arrow-left"></i> Back</a>
+    </div>
+</div>
+
+<div class="card shadow-sm mb-4">
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-4"><strong>Patient:</strong> {{ order.patient.full_name }}</div>
+            <div class="col-md-4"><strong>Doctor:</strong> Dr. {{ order.doctor.get_full_name }}</div>
+            <div class="col-md-4"><strong>Date:</strong> {{ order.created_at|date:"d-M-Y" }}</div>
+        </div>
+    </div>
+</div>
+
+<div class="card shadow-sm mb-4">
+    <div class="card-header"><h6 class="mb-0">Test Results</h6></div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead class="table-light">
+                    <tr><th>Test</th><th>Result</th><th>Unit</th><th>Reference Range</th><th>Status</th><th>Notes</th></tr>
+                </thead>
+                <tbody>
+                    {% for result in results %}
+                    <tr class="{% if result.status == 'abnormal' %}table-warning{% elif result.status == 'critical' %}table-danger{% endif %}">
+                        <td><strong>{{ result.test.name }}</strong></td>
+                        <td class="{% if result.status == 'abnormal' %}fw-bold text-warning{% elif result.status == 'critical' %}fw-bold text-danger{% endif %}">
+                            {{ result.value }}
+                            {% if result.status == 'abnormal' %}
+                            <i class="bi bi-exclamation-triangle text-warning"></i>
+                            {% elif result.status == 'critical' %}
+                            <i class="bi bi-exclamation-diamond-fill text-danger"></i>
+                            {% endif %}
+                        </td>
+                        <td>{{ result.unit|default:"-" }}</td>
+                        <td>{{ result.reference_range|default:"-" }}</td>
+                        <td>
+                            {% if result.status == 'critical' %}
+                            <span class="badge bg-danger">Critical</span>
+                            {% elif result.status == 'abnormal' %}
+                            <span class="badge bg-warning text-dark">Abnormal</span>
+                            {% else %}
+                            <span class="badge bg-success">Normal</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ result.notes|default:"-" }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="6" class="text-center text-muted">No results available.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+{% if result_notes %}
+<div class="card shadow-sm mb-4">
+    <div class="card-header"><h6 class="mb-0">Interpretation / Notes</h6></div>
+    <div class="card-body">{{ result_notes }}</div>
+</div>
+{% endif %}
+
+{% if result.report_file %}
+<div class="card shadow-sm">
+    <div class="card-header"><h6 class="mb-0">Attached Report</h6></div>
+    <div class="card-body">
+        <a href="{% url 'laboratory:result_download' result.pk %}" class="btn btn-outline-primary"><i class="bi bi-download"></i> Download Report</a>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

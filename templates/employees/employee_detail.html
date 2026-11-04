@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+{% block title %}Employee Profile | {{ hospital_name }}{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="mb-0"><i class="bi bi-person-badge me-2"></i>Employee Profile</h4>
+    <div>
+        <a href="{% url 'employees:employee_update' object.pk %}" class="btn btn-outline-primary"><i class="bi bi-pencil me-1"></i>Edit</a>
+        <a href="{% url 'employees:employee_list' %}" class="btn btn-outline-secondary"><i class="bi bi-arrow-left me-1"></i>Back</a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-4">
+        <div class="card mb-4">
+            <div class="card-body text-center">
+                {% if object.user.profile.photo %}
+                <img src="{{ object.user.profile.photo.url }}" alt="Profile" class="rounded-circle mb-3" width="120" height="120">
+                {% else %}
+                <div class="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 120px; height: 120px; font-size: 2.5rem;">
+                    {{ object.user.get_full_name|first }}
+                </div>
+                {% endif %}
+                <h5>{{ object.user.get_full_name|default:object.user.username }}</h5>
+                <p class="text-muted">{{ object.designation }}</p>
+                <span class="badge bg-{% if object.is_active %}success{% else %}danger{% endif %}">{% if object.is_active %}Active{% else %}Inactive{% endif %}</span>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header"><h6 class="mb-0">Personal Information</h6></div>
+            <div class="card-body">
+                <table class="table table-borderless mb-0">
+                    <tr><th width="40%">Employee ID</th><td>{{ object.employee_id }}</td></tr>
+                    <tr><th>Email</th><td>{{ object.user.email }}</td></tr>
+                    <tr><th>Phone</th><td>{{ object.phone }}</td></tr>
+                    <tr><th>Department</th><td>{{ object.department }}</td></tr>
+                    <tr><th>Joining Date</th><td>{{ object.joining_date|date:"d M Y" }}</td></tr>
+                    <tr><th>Date of Birth</th><td>{{ object.date_of_birth|date:"d M Y"|default:"-" }}</td></tr>
+                    <tr><th>Gender</th><td>{{ object.get_gender_display|default:"-" }}</td></tr>
+                    <tr><th>Blood Group</th><td>{{ object.blood_group|default:"-" }}</td></tr>
+                    <tr><th>Address</th><td>{{ object.address|default:"-" }}</td></tr>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-8">
+        <ul class="nav nav-tabs mb-4" id="employeeTabs" role="tablist">
+            <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" href="#attendance">Attendance</a></li>
+            <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#leaves">Leaves</a></li>
+        </ul>
+
+        <div class="tab-content">
+            <div class="tab-pane fade show active" id="attendance">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h6 class="mb-0">Recent Attendance</h6>
+                        <a href="{% url 'employees:attendance_mark' %}" class="btn btn-sm btn-primary"><i class="bi bi-check-lg me-1"></i>Mark Attendance</a>
+                    </div>
+                    <div class="card-body">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr><th>Date</th><th>Status</th><th>Check In</th><th>Check Out</th></tr>
+                            </thead>
+                            <tbody>
+                                {% for att in attendance %}
+                                <tr>
+                                    <td>{{ att.date|date:"d M Y" }}</td>
+                                    <td>
+                                        <span class="badge bg-{% if att.status == 'present' %}success{% elif att.status == 'absent' %}danger{% elif att.status == 'late' %}warning{% else %}info{% endif %}">
+                                            {{ att.get_status_display }}
+                                        </span>
+                                    </td>
+                                    <td>{{ att.check_in|time:"h:i A"|default:"-" }}</td>
+                                    <td>{{ att.check_out|time:"h:i A"|default:"-" }}</td>
+                                </tr>
+                                {% empty %}
+                                <tr><td colspan="4" class="text-center text-muted">No attendance records found</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-pane fade" id="leaves">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h6 class="mb-0">Leave Requests</h6>
+                        <a href="{% url 'employees:leave_create' %}" class="btn btn-sm btn-primary"><i class="bi bi-plus-lg me-1"></i>Request Leave</a>
+                    </div>
+                    <div class="card-body">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr><th>Type</th><th>From</th><th>To</th><th>Status</th></tr>
+                            </thead>
+                            <tbody>
+                                {% for leave in leaves %}
+                                <tr>
+                                    <td>{{ leave.leave_type }}</td>
+                                    <td>{{ leave.start_date|date:"d M Y" }}</td>
+                                    <td>{{ leave.end_date|date:"d M Y" }}</td>
+                                    <td>
+                                        <span class="badge bg-{% if leave.status == 'approved' %}success{% elif leave.status == 'rejected' %}danger{% elif leave.status == 'pending' %}warning{% else %}secondary{% endif %}">
+                                            {{ leave.get_status_display }}
+                                        </span>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr><td colspan="4" class="text-center text-muted">No leave requests found</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

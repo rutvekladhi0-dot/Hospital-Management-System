@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+{% block title %}{% if form.instance.pk %}Edit Order{% else %}New Radiology Order{% endif %} - {{ block.super }}{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="bi bi-camera-reels"></i> {% if form.instance.pk %}Edit Radiology Order{% else %}Create New Radiology Order{% endif %}</h5>
+            </div>
+            <div class="card-body">
+                <form method="post" novalidate>{% csrf_token %}{% crispy form %}</form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var patientSelect = document.getElementById('id_patient');
+    var appointmentSelect = document.getElementById('id_appointment');
+    if (!patientSelect || !appointmentSelect) return;
+
+    var currentAppointment = appointmentSelect.value;
+
+    patientSelect.addEventListener('change', function() {
+        var patientId = this.value;
+        if (!patientId) {
+            appointmentSelect.innerHTML = '<option value="">---------</option>';
+            return;
+        }
+        fetch("{% url 'radiology:appointments_by_patient' %}?patient_id=" + patientId)
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                appointmentSelect.innerHTML = '<option value="">---------</option>';
+                data.forEach(function(a) {
+                    var opt = document.createElement('option');
+                    opt.value = a.id;
+                    opt.text = a.label;
+                    if (a.id == currentAppointment) opt.selected = true;
+                    appointmentSelect.appendChild(opt);
+                });
+            });
+    });
+
+    if (patientSelect.value) {
+        patientSelect.dispatchEvent(new Event('change'));
+    }
+});
+</script>
+{% endblock %}

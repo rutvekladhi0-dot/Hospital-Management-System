@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Inventory Items - MEDCARE HOSPITAL & DIAGNOSTIC CENTER{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4><i class="bi bi-box-seam"></i> Inventory Items</h4>
+    <a href="{% url 'inventory:item_create' %}" class="btn btn-primary"><i class="bi bi-plus-lg"></i> Add Item</a>
+</div>
+{% if low_stock_count %}
+<div class="alert alert-warning d-flex align-items-center mb-4"><i class="bi bi-exclamation-triangle-fill me-2"></i><strong>{{ low_stock_count }} item(s) are low on stock!</strong> <a href="{% url 'inventory:stock_alert' %}" class="ms-2">View Alert</a></div>
+{% endif %}
+<div class="card shadow-sm">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover datatable">
+                <thead class="table-dark">
+                    <tr><th>#</th><th>Item Name</th><th>SKU</th><th>Category</th><th>Stock</th><th>Min Stock</th><th>Unit Price</th><th>Status</th><th>Actions</th></tr>
+                </thead>
+                <tbody>
+                    {% for item in items %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td><strong>{{ item.name }}</strong></td>
+                        <td><code>{{ item.sku|default:"-" }}</code></td>
+                        <td><span class="badge bg-info">{{ item.category.name|default:"-" }}</span></td>
+                        <td>{% if item.quantity <= item.reorder_level %}<span class="badge bg-danger">{{ item.quantity }} (Low)</span>{% else %}<span class="badge bg-success">{{ item.quantity }}</span>{% endif %}</td>
+                        <td>{{ item.reorder_level }}</td>
+                        <td>{{ item.unit_price|floatformat:2 }}</td>
+                        <td>{% if item.is_active %}<span class="badge bg-success">Active</span>{% else %}<span class="badge bg-secondary">Inactive</span>{% endif %}</td>
+                        <td><div class="btn-group btn-group-sm"><a href="{% url 'inventory:item_detail' item.pk %}" class="btn btn-outline-info"><i class="bi bi-eye"></i></a><a href="{% url 'inventory:item_update' item.pk %}" class="btn btn-outline-primary"><i class="bi bi-pencil"></i></a></div></td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="9" class="text-center py-4"><i class="bi bi-box-seam text-muted" style="font-size:2rem;"></i><p class="mt-2 text-muted">No inventory items found.</p></td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

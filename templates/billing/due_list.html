@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block title %}Due Invoices - MEDCARE HOSPITAL & DIAGNOSTIC CENTER{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4><i class="bi bi-exclamation-circle text-danger"></i> Due Invoices</h4>
+    <a href="{% url 'billing:invoice_list' %}" class="btn btn-secondary"><i class="bi bi-arrow-left"></i> All Invoices</a>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card bg-danger text-white shadow"><div class="card-body text-center"><h3>{{ total_due_count }}</h3><p class="mb-0">Total Due Invoices</p></div></div>
+    </div>
+    <div class="col-md-4">
+        <div class="card bg-warning text-dark shadow"><div class="card-body text-center"><h3>৳{{ total_due_amount|floatformat:2 }}</h3><p class="mb-0">Total Due Amount</p></div></div>
+    </div>
+    <div class="col-md-4">
+        <div class="card bg-info text-white shadow"><div class="card-body text-center"><h3>{{ overdue_count }}</h3><p class="mb-0">Overdue (>30 days)</p></div></div>
+    </div>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover datatable">
+                <thead class="table-dark">
+                    <tr>
+                        <th>#</th>
+                        <th>Invoice #</th>
+                        <th>Patient</th>
+                        <th>Total (৳)</th>
+                        <th>Paid (৳)</th>
+                        <th>Due (৳)</th>
+                        <th>Date</th>
+                        <th>Days Pending</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for inv in due_invoices %}
+                    <tr class="{% if inv.days_pending > 30 %}table-danger{% elif inv.days_pending > 14 %}table-warning{% endif %}">
+                        <td>{{ forloop.counter }}</td>
+                        <td><strong>{{ inv.invoice_number }}</strong></td>
+                        <td>{{ inv.patient.full_name|default:inv.patient }}</td>
+                        <td>{{ inv.total_amount|floatformat:2 }}</td>
+                        <td class="text-success">{{ inv.paid_amount|floatformat:2 }}</td>
+                        <td class="text-danger fw-bold">{{ inv.due_amount|floatformat:2 }}</td>
+                        <td>{{ inv.created_at|date:"d-M-Y" }}</td>
+                        <td>
+                            {% if inv.days_pending > 30 %}
+                            <span class="badge bg-danger">{{ inv.days_pending }} days</span>
+                            {% elif inv.days_pending > 14 %}
+                            <span class="badge bg-warning text-dark">{{ inv.days_pending }} days</span>
+                            {% else %}
+                            <span class="badge bg-secondary">{{ inv.days_pending }} days</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="{% url 'billing:payment_create' inv.pk %}" class="btn btn-sm btn-success"><i class="bi bi-cash"></i> Collect</a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="9" class="text-center py-4"><i class="bi bi-check-circle text-success" style="font-size:2rem;"></i><p class="mt-2 text-muted">No due invoices!</p></td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

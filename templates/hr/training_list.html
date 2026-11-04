@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Trainings - MEDCARE HOSPITAL & DIAGNOSTIC CENTER{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4><i class="bi bi-mortarboard"></i> Trainings</h4>
+    <a href="{% url 'hr:training_create' %}" class="btn btn-primary"><i class="bi bi-plus-lg"></i> Add Training</a>
+</div>
+<div class="card shadow-sm">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover datatable">
+                <thead class="table-dark">
+                    <tr><th>#</th><th>Title</th><th>Type</th><th>Start Date</th><th>End Date</th><th>Participants</th><th>Status</th><th>Actions</th></tr>
+                </thead>
+                <tbody>
+                    {% for t in trainings %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td><strong>{{ t.title }}</strong></td>
+                        <td>{{ t.trainer|default:"-" }}</td>
+                        <td>{{ t.start_date|date:"d-M-Y" }}</td>
+                        <td>{{ t.end_date|date:"d-M-Y"|default:"-" }}</td>
+                        <td><span class="badge bg-info">{{ t.participant_count|default:"0" }}</span></td>
+                        <td>{% if t.status == 'Completed' %}<span class="badge bg-success">Completed</span>{% elif t.status == 'Ongoing' %}<span class="badge bg-primary">Ongoing</span>{% else %}<span class="badge bg-warning text-dark">Planned</span>{% endif %}</td>
+                        <td><div class="btn-group btn-group-sm"><a href="{% url 'hr:training_update' t.pk %}" class="btn btn-outline-primary"><i class="bi bi-pencil"></i></a></div></td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="8" class="text-center py-4"><i class="bi bi-mortarboard text-muted" style="font-size:2rem;"></i><p class="mt-2 text-muted">No trainings found.</p></td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

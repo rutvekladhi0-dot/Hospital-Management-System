@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+{% block title %}Branches | {{ hospital_name }}{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="mb-0"><i class="bi bi-building me-2"></i>Branches</h4>
+    <a href="{% url 'hospitals:branch_create' %}" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i>Add Branch</a>
+</div>
+<div class="card">
+    <div class="card-body">
+        <table class="table table-hover datatable" id="branchTable">
+            <thead>
+                <tr><th>Name</th><th>Phone</th><th>Address</th><th>Status</th><th>Actions</th></tr>
+            </thead>
+            <tbody>
+                {% for branch in branches %}
+                <tr>
+                    <td>{{ branch.name }}</td>
+                    <td>{{ branch.phone }}</td>
+                    <td>{{ branch.address|truncatewords:5 }}</td>
+                    <td><span class="badge bg-{% if branch.is_active %}success{% else %}danger{% endif %}">{% if branch.is_active %}Active{% else %}Inactive{% endif %}</span></td>
+                    <td>
+                        <a href="{% url 'hospitals:branch_update' branch.pk %}" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i></a>
+                        <a href="{% url 'hospitals:branch_delete' branch.pk %}" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="5" class="text-center text-muted py-4">No branches found</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

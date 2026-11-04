@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+{% block title %}Doctor Availability | {{ hospital_name }}{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="mb-0"><i class="bi bi-person-check me-2"></i>Doctor Availability</h4>
+    <a href="{% url 'doctors:availability_create' %}" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i>Add Availability</a>
+</div>
+<div class="card">
+    <div class="card-header">
+        <form method="get" class="row g-2 align-items-end needs-validation">
+            <div class="col-md-3">
+                <label class="form-label">Filter by Doctor</label>
+                <select name="doctor" class="form-select" onchange="this.form.submit()">
+                    <option value="">All Doctors</option>
+                    {% for doctor in doctors %}
+                    <option value="{{ doctor.pk }}" {% if request.GET.doctor == doctor.pk|stringformat:"d" %}selected{% endif %}>Dr. {{ doctor.user.get_full_name|default:doctor.user.username }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </form>
+    </div>
+    <div class="card-body">
+        <table class="table table-hover datatable" id="{{ table_id }}">
+            <thead>
+                <tr><th>Doctor</th><th>Date</th><th>Start Time</th><th>End Time</th><th>Available</th><th>Max Patients</th><th>Current Patients</th><th>Actions</th></tr>
+            </thead>
+            <tbody>
+                {% for availability in availabilities %}
+                <tr>
+                    <td>Dr. {{ availability.doctor.user.get_full_name|default:availability.doctor.user.username }}</td>
+                    <td>{{ availability.date|date:"d M Y" }}</td>
+                    <td>{{ availability.start_time|time:"h:i A" }}</td>
+                    <td>{{ availability.end_time|time:"h:i A" }}</td>
+                    <td>
+                        <span class="badge bg-{% if availability.is_available %}success{% else %}secondary{% endif %}">
+                            {% if availability.is_available %}Available{% else %}Unavailable{% endif %}
+                        </span>
+                    </td>
+                    <td>{{ availability.max_patients }}</td>
+                    <td>{{ availability.current_patients }}</td>
+                    <td>
+                        <a href="{% url 'doctors:availability_update' availability.pk %}" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i></a>
+                        <a href="{% url 'doctors:availability_delete' availability.pk %}" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="8" class="text-center text-muted py-4">No availability records found</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

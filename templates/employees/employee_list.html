@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+{% block title %}Employees | {{ hospital_name }}{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="mb-0"><i class="bi bi-people me-2"></i>Employees</h4>
+    <a href="{% url 'employees:employee_create' %}" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i>Add Employee</a>
+</div>
+<div class="card">
+    <div class="card-body">
+        <table class="table table-hover datatable" id="employeeTable">
+            <thead>
+                <tr><th>Employee ID</th><th>Name</th><th>Department</th><th>Designation</th><th>Joining Date</th><th>Status</th><th>Actions</th></tr>
+            </thead>
+            <tbody>
+                {% for employee in employees %}
+                <tr>
+                    <td>{{ employee.employee_id }}</td>
+                    <td>{{ employee.user.get_full_name|default:employee.user.username }}</td>
+                    <td>{{ employee.department }}</td>
+                    <td>{{ employee.designation }}</td>
+                    <td>{{ employee.joining_date|date:"d M Y" }}</td>
+                    <td><span class="badge bg-{% if employee.is_active %}success{% else %}danger{% endif %}">{% if employee.is_active %}Active{% else %}Inactive{% endif %}</span></td>
+                    <td>
+                        <a href="{% url 'employees:employee_detail' employee.pk %}" class="btn btn-sm btn-outline-info"><i class="bi bi-eye"></i></a>
+                        <a href="{% url 'employees:employee_update' employee.pk %}" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i></a>
+                        <a href="{% url 'employees:employee_delete' employee.pk %}" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="7" class="text-center text-muted py-4">No employees found</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

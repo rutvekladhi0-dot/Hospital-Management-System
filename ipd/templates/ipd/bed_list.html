@@ -1,0 +1,103 @@
+{% extends "base/base.html" %}
+
+{% block title %}Beds - MEDCARE{% endblock %}
+
+{% block content %}
+<div class="row mb-3">
+    <div class="col-md-8">
+        <h4><i class="fas fa-bed"></i> Beds</h4>
+    </div>
+    <div class="col-md-4 text-end">
+        <a href="{% url 'ipd:ward_list' %}" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Wards</a>
+    </div>
+</div>
+
+<div class="row mb-3">
+    <div class="col-md-3">
+        <div class="card text-white bg-success">
+            <div class="card-body">
+                <h6>Available</h6>
+                <h3>{{ available_beds }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-danger">
+            <div class="card-body">
+                <h6>Occupied</h6>
+                <h3>{{ occupied_beds }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-warning">
+            <div class="card-body">
+                <h6>Reserved</h6>
+                <h3>{{ reserved_beds }}</h3>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <form method="get" class="row g-2 mb-3">
+            <div class="col-md-4">
+                <input type="text" name="search" class="form-control" placeholder="Search beds..." value="{{ request.GET.search }}">
+            </div>
+            <div class="col-md-3">
+                <select name="ward" class="form-select">
+                    <option value="">All Wards</option>
+                    {% for w in wards %}
+                    <option value="{{ w.pk }}" {% if request.GET.ward == w.pk|stringformat:"d" %}selected{% endif %}>{{ w.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <select name="status" class="form-select">
+                    <option value="">All Status</option>
+                    <option value="Available" {% if request.GET.status == 'Available' %}selected{% endif %}>Available</option>
+                    <option value="Occupied" {% if request.GET.status == 'Occupied' %}selected{% endif %}>Occupied</option>
+                    <option value="Reserved" {% if request.GET.status == 'Reserved' %}selected{% endif %}>Reserved</option>
+                    <option value="Maintenance" {% if request.GET.status == 'Maintenance' %}selected{% endif %}>Maintenance</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary"><i class="fas fa-filter"></i> Filter</button>
+            </div>
+        </form>
+        <table id="{{ table_id }}" class="table table-striped table-hover">
+            <thead>
+                <tr>
+                    <th>Bed #</th>
+                    <th>Ward</th>
+                    <th>Type</th>
+                    <th>Status</th>
+                    <th>Daily Rate</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for bed in beds %}
+                <tr>
+                    <td>{{ bed.bed_number }}</td>
+                    <td>{{ bed.ward }}</td>
+                    <td>{{ bed.bed_type }}</td>
+                    <td>
+                        {% if bed.status == 'Available' %}
+                        <span class="badge bg-success">{{ bed.status }}</span>
+                        {% elif bed.status == 'Occupied' %}
+                        <span class="badge bg-danger">{{ bed.status }}</span>
+                        {% elif bed.status == 'Reserved' %}
+                        <span class="badge bg-warning">{{ bed.status }}</span>
+                        {% else %}
+                        <span class="badge bg-secondary">{{ bed.status }}</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ bed.daily_rate|floatformat:2 }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

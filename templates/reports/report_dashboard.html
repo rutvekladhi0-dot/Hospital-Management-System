@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+{% block title %}Reports Dashboard - MEDCARE HOSPITAL & DIAGNOSTIC CENTER{% endblock %}
+{% block content %}
+<div class="mb-4">
+    <h4><i class="bi bi-graph-up"></i> Reports Dashboard</h4>
+</div>
+<div class="row g-3 mb-4">
+    <div class="col-lg-3 col-md-4 col-sm-6">
+        <a href="{% url 'reports:revenue_report' %}" class="text-decoration-none">
+            <div class="card report-card bg-primary text-white shadow-sm h-100">
+                <div class="card-body text-center">
+                    <i class="bi bi-currency-dollar" style="font-size:2rem;"></i>
+                    <h6 class="mt-2 mb-1">Revenue Report</h6>
+                    <small class="opacity-75">Track hospital revenue</small>
+                </div>
+            </div>
+        </a>
+    </div>
+    <div class="col-lg-3 col-md-4 col-sm-6">
+        <a href="{% url 'reports:appointment_report' %}" class="text-decoration-none">
+            <div class="card report-card bg-success text-white shadow-sm h-100">
+                <div class="card-body text-center">
+                    <i class="bi bi-calendar-check" style="font-size:2rem;"></i>
+                    <h6 class="mt-2 mb-1">Appointment Report</h6>
+                    <small class="opacity-75">Appointment statistics</small>
+                </div>
+            </div>
+        </a>
+    </div>
+    <div class="col-lg-3 col-md-4 col-sm-6">
+        <a href="{% url 'reports:patient_report' %}" class="text-decoration-none">
+            <div class="card report-card bg-info text-white shadow-sm h-100">
+                <div class="card-body text-center">
+                    <i class="bi bi-people" style="font-size:2rem;"></i>
+                    <h6 class="mt-2 mb-1">Patient Report</h6>
+                    <small class="opacity-75">Patient registrations</small>
+                </div>
+            </div>
+        </a>
+    </div>
+    <div class="col-lg-3 col-md-4 col-sm-6">
+        <a href="{% url 'reports:pharmacy_report' %}" class="text-decoration-none">
+            <div class="card report-card bg-warning text-dark shadow-sm h-100">
+                <div class="card-body text-center">
+                    <i class="bi bi-capsule" style="font-size:2rem;"></i>
+                    <h6 class="mt-2 mb-1">Pharmacy Report</h6>
+                    <small class="opacity-75">Pharmacy sales</small>
+                </div>
+            </div>
+        </a>
+    </div>
+    <div class="col-lg-3 col-md-4 col-sm-6">
+        <a href="{% url 'reports:inventory_report' %}" class="text-decoration-none">
+            <div class="card report-card bg-secondary text-white shadow-sm h-100">
+                <div class="card-body text-center">
+                    <i class="bi bi-box-seam" style="font-size:2rem;"></i>
+                    <h6 class="mt-2 mb-1">Inventory Report</h6>
+                    <small class="opacity-75">Stock levels</small>
+                </div>
+            </div>
+        </a>
+    </div>
+    <div class="col-lg-3 col-md-4 col-sm-6">
+        <a href="{% url 'reports:lab_report' %}" class="text-decoration-none">
+            <div class="card report-card bg-danger text-white shadow-sm h-100">
+                <div class="card-body text-center">
+                    <i class="bi bi-droplet" style="font-size:2rem;"></i>
+                    <h6 class="mt-2 mb-1">Lab Report</h6>
+                    <small class="opacity-75">Lab test statistics</small>
+                </div>
+            </div>
+        </a>
+    </div>
+    <div class="col-lg-3 col-md-4 col-sm-6">
+        <a href="{% url 'reports:employee_report' %}" class="text-decoration-none">
+            <div class="card report-card bg-dark text-white shadow-sm h-100">
+                <div class="card-body text-center">
+                    <i class="bi bi-person-badge" style="font-size:2rem;"></i>
+                    <h6 class="mt-2 mb-1">Employee Report</h6>
+                    <small class="opacity-75">Staff statistics</small>
+                </div>
+            </div>
+        </a>
+    </div>
+    <div class="col-lg-3 col-md-4 col-sm-6"></div>
+</div>
+
+<div class="card shadow-sm mb-4">
+    <div class="card-header"><h6 class="mb-0"><i class="bi bi-bar-chart-line"></i> Key Metrics Overview</h6></div>
+    <div class="card-body">
+        <canvas id="overviewChart" height="100"></canvas>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+fetch('/api/reports/overview/').then(r=>r.json()).then(data=>{
+    new Chart(document.getElementById('overviewChart'), {
+        type: 'bar',
+        data: {
+            labels: data.labels || ['Appointments', 'Patients', 'Revenue', 'Lab Tests', 'Surgeries'],
+            datasets: [{
+                label: 'This Month',
+                data: data.current || [120, 85, 450000, 200, 30],
+                backgroundColor: '#0d6efd'
+            },{
+                label: 'Last Month',
+                data: data.previous || [100, 70, 400000, 180, 25],
+                backgroundColor: '#6c757d'
+            }]
+        },
+        options: { responsive: true, scales: { y: { beginAtZero: true } } }
+    });
+}).catch(()=>{
+    new Chart(document.getElementById('overviewChart'), {
+        type: 'bar',
+        data: {
+            labels: ['Appointments', 'Patients', 'Revenue (K)', 'Lab Tests', 'Pharmacy Sales (K)'],
+            datasets: [{ label: 'This Month', data: [120, 85, 450, 200, 180], backgroundColor: '#0d6efd' },
+                       { label: 'Last Month', data: [100, 70, 400, 180, 160], backgroundColor: '#6c757d' }]
+        },
+        options: { responsive: true, scales: { y: { beginAtZero: true } } }
+    });
+});
+</script>
+{% endblock %}
+

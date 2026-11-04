@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}Beds - MEDCARE HOSPITAL & DIAGNOSTIC CENTER{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4><i class="bi bi-grid-3x3-gap"></i> Bed Management</h4>
+    <div class="d-flex gap-2">
+        <span class="badge bg-success fs-6">Available: {{ available_count }}</span>
+        <span class="badge bg-danger fs-6">Occupied: {{ occupied_count }}</span>
+        <span class="badge bg-warning text-dark fs-6">Reserved: {{ reserved_count }}</span>
+        <span class="badge bg-secondary fs-6">Maintenance: {{ maintenance_count }}</span>
+    </div>
+</div>
+<div class="card shadow-sm">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover datatable">
+                <thead class="table-dark">
+                    <tr><th>#</th><th>Bed #</th><th>Ward</th><th>Floor</th><th>Rate/Day</th><th>Status</th><th>Current Patient</th><th>Actions</th></tr>
+                </thead>
+                <tbody>
+                    {% for bed in beds %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td><strong>{{ bed.bed_number }}</strong></td>
+                        <td>{{ bed.ward.name }}</td>
+                        <td>{{ bed.ward.floor|default:"-" }}</td>
+                        <td>৳{{ bed.ward.rate_per_day|floatformat:0 }}</td>
+                        <td>
+                            {% if bed.status == 'available' %}<span class="badge bg-success">Available</span>
+                            {% elif bed.status == 'occupied' %}<span class="badge bg-danger">Occupied</span>
+                            {% elif bed.status == 'reserved' %}<span class="badge bg-warning text-dark">Reserved</span>
+                            {% else %}<span class="badge bg-secondary">Maintenance</span>{% endif %}
+                        </td>
+                        <td>
+                            {% if bed.current_patient %}{{ bed.current_patient.full_name }}{% else %}-{% endif %}
+                        </td>
+                        <td>
+                            {% if bed.status == 'available' %}
+                            <a href="{% url 'ipd:admission_create' %}?bed={{ bed.pk }}" class="btn btn-sm btn-success"><i class="bi bi-person-plus"></i></a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="8" class="text-center py-4"><i class="bi bi-grid-3x3-gap text-muted" style="font-size:2rem;"></i><p class="mt-2 text-muted">No beds configured.</p></td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

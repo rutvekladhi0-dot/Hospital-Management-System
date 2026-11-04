@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+{% block title %}{% if form.instance.pk %}Edit Medicine{% else %}Add Medicine{% endif %} - {{ block.super }}{% endblock %}
+{% block extra_css %}
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet" />
+{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-capsule"></i>
+                    {% if form.instance.pk %}Edit Medicine{% else %}Add New Medicine{% endif %}
+                </h5>
+            </div>
+            <div class="card-body">
+                <form method="post" novalidate class="needs-validation">
+                    {% csrf_token %}
+                    {% if form.non_field_errors %}
+                    <div class="alert alert-danger">
+                        {% for error in form.non_field_errors %}<p class="mb-0">{{ error }}</p>{% endfor %}
+                    </div>
+                    {% endif %}
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label for="id_name" class="form-label">Medicine Name <span class="text-danger">*</span></label>
+                            {{ form.name }}
+                            {% if form.name.errors %}<div class="text-danger small">{{ form.name.errors.0 }}</div>{% endif %}
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="id_generic_name" class="form-label">Generic Name</label>
+                            {{ form.generic_name }}
+                            {% if form.generic_name.errors %}<div class="text-danger small">{{ form.generic_name.errors.0 }}</div>{% endif %}
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="id_manufacturer" class="form-label">Manufacturer</label>
+                            {{ form.manufacturer }}
+                            {% if form.manufacturer.errors %}<div class="text-danger small">{{ form.manufacturer.errors.0 }}</div>{% endif %}
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label for="id_category" class="form-label">Category</label>
+                            {{ form.category }}
+                            {% if form.category.errors %}<div class="text-danger small">{{ form.category.errors.0 }}</div>{% endif %}
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="id_category_fk" class="form-label">Category (Detailed)</label>
+                            {{ form.category_fk }}
+                            {% if form.category_fk.errors %}<div class="text-danger small">{{ form.category_fk.errors.0 }}</div>{% endif %}
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="id_batch_number" class="form-label">Batch Number</label>
+                            {{ form.batch_number }}
+                            {% if form.batch_number.errors %}<div class="text-danger small">{{ form.batch_number.errors.0 }}</div>{% endif %}
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label for="id_unit_price" class="form-label">Price (&#2547;) <span class="text-danger">*</span></label>
+                            {{ form.unit_price }}
+                            {% if form.unit_price.errors %}<div class="text-danger small">{{ form.unit_price.errors.0 }}</div>{% endif %}
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="id_stock_quantity" class="form-label">Stock Quantity <span class="text-danger">*</span></label>
+                            {{ form.stock_quantity }}
+                            {% if form.stock_quantity.errors %}<div class="text-danger small">{{ form.stock_quantity.errors.0 }}</div>{% endif %}
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="id_minimum_stock" class="form-label">Minimum Stock</label>
+                            {{ form.minimum_stock }}
+                            {% if form.minimum_stock.errors %}<div class="text-danger small">{{ form.minimum_stock.errors.0 }}</div>{% endif %}
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="id_expiry_date" class="form-label">Expiry Date</label>
+                            {{ form.expiry_date }}
+                            {% if form.expiry_date.errors %}<div class="text-danger small">{{ form.expiry_date.errors.0 }}</div>{% endif %}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Active</label>
+                            <div class="form-check mt-2">
+                                {{ form.is_active }}
+                                <label class="form-check-label" for="id_is_active">Yes</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Suppliers</label>
+                        {{ form.suppliers }}
+                        {% if form.suppliers.errors %}<div class="text-danger small">{{ form.suppliers.errors.0 }}</div>{% endif %}
+                    </div>
+                    <div class="d-flex justify-content-end gap-2">
+                        <a href="{% url 'pharmacy:medicine_list' %}" class="btn btn-secondary">Cancel</a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-lg"></i>
+                            {% if form.instance.pk %}Update Medicine{% else %}Save Medicine{% endif %}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script>
+document.querySelectorAll('form input, form select, form textarea').forEach(function(el) {
+    if (!el.classList.contains('form-check-input') && !el.classList.contains('select2-hidden-accessible')) {
+        el.classList.add('form-control');
+    }
+    if (el.tagName === 'SELECT' && !el.classList.contains('select2-hidden-accessible')) {
+        el.classList.add('form-select');
+        el.classList.remove('form-control');
+    }
+});
+
+$('#id_suppliers').select2({
+    theme: 'bootstrap-5',
+    placeholder: 'Search and select suppliers...',
+    allowClear: true,
+    width: '100%'
+});
+</script>
+{% endblock %}

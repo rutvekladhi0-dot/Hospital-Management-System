@@ -1,0 +1,62 @@
+<nav class="top-navbar navbar navbar-expand-lg fixed-top">
+    <div class="container-fluid">
+        <button class="btn btn-link text-dark sidebar-toggle-btn" id="sidebarToggle">
+            <i class="bi bi-list fs-4"></i>
+        </button>
+        <div class="ms-3 flex-grow-1">
+            <div class="position-relative" style="max-width: 400px;">
+                <i class="bi bi-search position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
+                <input type="text" class="form-control ps-5" id="globalSearch" placeholder="Search patients, doctors, appointments...">
+            </div>
+        </div>
+        <div class="d-flex align-items-center">
+            <button class="btn btn-link text-dark position-relative me-2 navbar-icon-btn" id="darkModeToggle" title="Toggle Dark Mode">
+                <i class="bi bi-moon fs-5"></i>
+            </button>
+            <div class="dropdown me-2">
+                <button class="btn btn-link text-dark position-relative navbar-icon-btn" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="bi bi-bell fs-5"></i>
+                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger notification-badge {% if unread_notifications == 0 %}d-none{% endif %}" id="notificationCount">
+                        {{ unread_notifications }}
+                    </span>
+                </button>
+                <div class="dropdown-menu dropdown-menu-end notification-dropdown" style="width: 350px; max-height: 400px; overflow-y: auto;">
+                    <h6 class="dropdown-header d-flex justify-content-between align-items-center">
+                        <span>Notifications</span>
+                        <a href="#" class="text-decoration-none small" id="markAllRead">Mark all read</a>
+                    </h6>
+                    <div class="dropdown-divider"></div>
+                    <div id="notificationList">
+                        <div class="text-center text-muted py-3">Loading...</div>
+                    </div>
+                    <div class="dropdown-divider"></div>
+                    <a href="{% url 'notifications:notification_list' %}" class="dropdown-item text-center small text-primary">View all notifications</a>
+                </div>
+            </div>
+            <div class="dropdown">
+                <button class="btn btn-link text-dark text-decoration-none d-flex align-items-center dropdown-toggle navbar-icon-btn" data-bs-toggle="dropdown">
+                    <div class="avatar-circle me-2">
+                        {% if user.profile_picture %}
+                        <img src="{{ user.profile_picture.url }}" alt="{{ user.get_full_name }}" class="rounded-circle" width="32" height="32">
+                        {% else %}
+                        <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">
+                            {{ user.first_name.0 }}{{ user.last_name.0 }}
+                        </div>
+                        {% endif %}
+                    </div>
+                    <span class="d-none d-md-inline">{{ user.get_full_name|default:user.username }}</span>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    <li class="dropdown-header">
+                        <div class="fw-bold">{{ user.get_full_name|default:user.username }}</div>
+                        <small class="text-muted">{{ user.email }}</small>
+                    </li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item" href="{% url 'accounts:profile' %}"><i class="bi bi-person me-2"></i>Profile</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item text-danger" href="{% url 'accounts:logout' %}"><i class="bi bi-box-arrow-left me-2"></i>Logout</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</nav>

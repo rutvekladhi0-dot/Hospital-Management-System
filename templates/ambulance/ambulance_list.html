@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Ambulance Fleet - MEDCARE HOSPITAL & DIAGNOSTIC CENTER{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4><i class="bi bi-truck"></i> Ambulance Fleet</h4>
+    <a href="{% url 'ambulance:ambulance_create' %}" class="btn btn-primary"><i class="bi bi-plus-lg"></i> Add Ambulance</a>
+</div>
+<div class="row">
+    {% for amb in ambulances %}
+    <div class="col-md-4 mb-4">
+        <div class="card shadow-sm h-100">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h6 class="mb-0"><strong>{{ amb.vehicle_number }}</strong></h6>
+                {% if amb.status == 'available' %}<span class="badge bg-success">Available</span>
+                {% elif amb.status == 'on-duty' %}<span class="badge bg-danger">On Duty</span>
+                {% elif amb.status == 'maintenance' %}<span class="badge bg-warning text-dark">Maintenance</span>
+                {% else %}<span class="badge bg-secondary">Offline</span>{% endif %}
+            </div>
+            <div class="card-body">
+                <p><strong>Type:</strong> {{ amb.ambulance_type|default:"Basic" }}</p>
+                <p><strong>Driver:</strong> {{ amb.driver_name|default:"-" }}</p>
+                <p><strong>Phone:</strong> {{ amb.driver_phone|default:"-" }}</p>
+                <p><strong>Current Location:</strong> {{ amb.current_location|default:"-" }}</p>
+            </div>
+            <div class="card-footer">
+                <div class="btn-group btn-group-sm w-100">
+                    <a href="{% url 'ambulance:ambulance_update' amb.pk %}" class="btn btn-outline-primary"><i class="bi bi-pencil"></i> Edit</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12 text-center py-5"><i class="bi bi-truck text-muted" style="font-size:3rem;"></i><p class="mt-2 text-muted">No ambulances in fleet.</p></div>
+    {% endfor %}
+</div>
+{% endblock %}
