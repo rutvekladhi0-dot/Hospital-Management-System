@@ -1,4 +1,3 @@
-
 import os
 import dj_database_url
 from pathlib import Path
@@ -10,19 +9,33 @@ SECRET_KEY = os.getenv(
     'local-development-only-key-change-before-deployment'
 )
 
-DEBUG = os.getenv('DJANGO_DEBUG', 'True').lower() == 'true'
+# Production-safe default; enable DEBUG explicitly only for local development.
+DEBUG = os.getenv('DJANGO_DEBUG', 'False').strip().lower() == 'true'
 
-ALLOWED_HOSTS = os.getenv(
-    'DJANGO_ALLOWED_HOSTS',
-    'localhost,127.0.0.1'
-).split(',')
+ALLOWED_HOSTS = [
+    host.strip()
+    for host in os.getenv(
+        'DJANGO_ALLOWED_HOSTS',
+        '.vercel.app,localhost,127.0.0.1'
+    ).split(',')
+    if host.strip()
+]
 
 CSRF_TRUSTED_ORIGINS = [
-    x.strip() for x in os.getenv(
+    origin.strip()
+    for origin in os.getenv(
         'CSRF_TRUSTED_ORIGINS',
-        'http://localhost,http://127.0.0.1'
-    ).split(',') if x.strip()
+        'https://*.vercel.app,http://localhost,http://127.0.0.1'
+    ).split(',')
+    if origin.strip()
 ]
+
+# Vercel terminates HTTPS before forwarding requests to Django.
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+SESSION_COOKIE_SECURE = not DEBUG
+CSRF_COOKIE_SECURE = not DEBUG
+SESSION_COOKIE_SAMESITE = 'Lax'
+CSRF_COOKIE_SAMESITE = 'Lax'
 
 INSTALLED_APPS = [
     'django.contrib.admin',
