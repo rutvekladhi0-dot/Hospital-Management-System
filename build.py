@@ -13,6 +13,14 @@ def run(cmd):
 def main():
     print("=== Starting Medcare Vercel Build ===")
 
+    # Ensure dependencies are available
+    try:
+        import django
+    except ImportError:
+        print("--> Installing dependencies from requirements.txt...")
+        run([sys.executable, "-m", "pip", "install", "-r", "requirements.txt"])
+        import django
+
     # 1. Collect static assets
     print("--> Collecting static files...")
     run([sys.executable, "manage.py", "collectstatic", "--noinput"])
@@ -26,7 +34,6 @@ def main():
 
     print("--> DATABASE_URL detected. Running database migrations...")
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "medcare.settings")
-    import django
     django.setup()
 
     from django.db import connection
